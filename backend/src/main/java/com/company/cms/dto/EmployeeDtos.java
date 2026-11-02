@@ -42,6 +42,10 @@ public class EmployeeDtos {
 
         private Long managerId;
 
+        private String password;
+
+        private com.company.cms.entity.Role role;
+
         public String getEmployeeCode() { return employeeCode; }
         public void setEmployeeCode(String employeeCode) { this.employeeCode = employeeCode; }
         public String getFirstName() { return firstName; }
@@ -64,6 +68,10 @@ public class EmployeeDtos {
         public void setDepartmentId(Long departmentId) { this.departmentId = departmentId; }
         public Long getManagerId() { return managerId; }
         public void setManagerId(Long managerId) { this.managerId = managerId; }
+        public String getPassword() { return password; }
+        public void setPassword(String password) { this.password = password; }
+        public com.company.cms.entity.Role getRole() { return role; }
+        public void setRole(com.company.cms.entity.Role role) { this.role = role; }
     }
 
     public static class EmployeeResponse {
@@ -83,6 +91,9 @@ public class EmployeeDtos {
         private String departmentName;
         private Long managerId;
         private String managerName;
+        private Long userId;
+        private com.company.cms.entity.Role userRole;
+        private boolean hasUserAccount;
 
         public EmployeeResponse() {}
 
@@ -118,5 +129,11 @@ public class EmployeeDtos {
         public void setManagerId(Long managerId) { this.managerId = managerId; }
         public String getManagerName() { return managerName; }
         public void setManagerName(String managerName) { this.managerName = managerName; }
+        public Long getUserId() { return userId; }
+        public void setUserId(Long userId) { this.userId = userId; }
+        public com.company.cms.entity.Role getUserRole() { return userRole; }
+        public void setUserRole(com.company.cms.entity.Role userRole) { this.userRole = userRole; }
+        public boolean isHasUserAccount() { return hasUserAccount; }
+        public void setHasUserAccount(boolean hasUserAccount) { this.hasUserAccount = hasUserAccount; }
     }
 }

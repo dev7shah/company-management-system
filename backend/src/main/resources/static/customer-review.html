@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Customer Feedback & Satisfaction Survey — Enterprise Suite</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="/css/style.css">
+  <style>
+    body {
+      background: radial-gradient(circle at 10% 10%, rgba(99, 102, 241, 0.08) 0%, transparent 40%),
+                  radial-gradient(circle at 90% 90%, rgba(6, 182, 212, 0.08) 0%, transparent 40%),
+                  #f8fafc;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      margin: 0;
+      padding: 32px 16px;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      color: #0f172a;
+    }
+
+    .survey-card {
+      width: 100%;
+      max-width: 580px;
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 16px;
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.08), 0 8px 10px -6px rgba(0, 0, 0, 0.04);
+      padding: 36px 32px;
+      position: relative;
+    }
+
+    .brand-icon {
+      width: 52px;
+      height: 52px;
+      margin: 0 auto 16px;
+      background: linear-gradient(135deg, #4f46e5 0%, #06b6d4 100%);
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 22px;
+      box-shadow: 0 8px 16px -4px rgba(79, 70, 229, 0.35);
+    }
+
+    .header-section {
+      text-align: center;
+      margin-bottom: 28px;
+    }
+
+    .header-section h1 {
+      font-size: 22px;
+      font-weight: 800;
+      color: #0f172a;
+      letter-spacing: -0.02em;
+      margin-bottom: 8px;
+    }
+
+    .header-section p {
+      font-size: 14px;
+      color: #64748b;
+      line-height: 1.5;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .form-label {
+      display: block;
+      font-size: 13px;
+      font-weight: 600;
+      color: #334155;
+      margin-bottom: 8px;
+    }
+
+    .form-label span.req {
+      color: #ef4444;
+      margin-left: 2px;
+    }
+
+    .star-rating-box {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      padding: 16px;
+      text-align: center;
+    }
+
+    .stars-row {
+      display: inline-flex;
+      gap: 10px;
+      cursor: pointer;
+      margin-bottom: 8px;
+    }
+
+    .star-btn {
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 4px;
+      transition: transform 0.15s ease;
+    }
+
+    .star-btn:hover {
+      transform: scale(1.2);
+    }
+
+    .star-btn svg {
+      width: 32px;
+      height: 32px;
+      transition: fill 0.15s ease, stroke 0.15s ease;
+    }
+
+    .rating-label {
+      font-size: 13px;
+      font-weight: 600;
+      color: #64748b;
+      min-height: 20px;
+      transition: color 0.2s ease;
+    }
+
+    .char-counter {
+      text-align: right;
+      font-size: 11px;
+      color: #94a3b8;
+      margin-top: 4px;
+    }
+
+    .btn-submit {
+      width: 100%;
+      padding: 13px 20px;
+      background: #4f46e5;
+      color: #ffffff;
+      border: none;
+      border-radius: 10px;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: background 0.2s, transform 0.1s;
+      box-shadow: 0 4px 12px rgba(79, 70, 229, 0.25);
+    }
+
+    .btn-submit:hover {
+      background: #4338ca;
+    }
+
+    .btn-submit:active {
+      transform: scale(0.99);
+    }
+
+    .btn-submit:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .success-card {
+      display: none;
+      text-align: center;
+      padding: 20px 0;
+    }
+
+    .success-icon {
+      width: 68px;
+      height: 68px;
+      border-radius: 50%;
+      background: #ecfdf5;
+      color: #10b981;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 32px;
+      margin: 0 auto 20px;
+      box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);
+    }
+
+    .trust-badge {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      font-size: 11px;
+      color: #94a3b8;
+      margin-top: 24px;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+
+<div class="survey-card">
+  <!-- Brand Icon & Header -->
+  <div class="brand-icon">
+    <i class="fa-solid fa-cube"></i>
+  </div>
+  <div class="header-section">
+    <h1>Client Experience & Feedback</h1>
+    <p>We are committed to delivering world-class enterprise solutions. Please rate your recent experience to help us improve.</p>
+  </div>
+
+  <!-- Survey Form -->
+  <form id="publicFeedbackForm">
+    <!-- Customer Account -->
+    <div class="form-group">
+      <label class="form-label" for="customerId">Your Company / Client Account <span class="req">*</span></label>
+      <select id="customerId" class="form-select" required style="width:100%;font-size:14px;padding:10px 12px;">
+        <option value="" disabled selected>Loading client accounts...</option>
+      </select>
+    </div>
+
+    <!-- Product / Service -->
+    <div class="form-group">
+      <label class="form-label" for="productId">Product or Service Evaluated</label>
+      <select id="productId" class="form-select" style="width:100%;font-size:14px;padding:10px 12px;">
+        <option value="">— Overall Company Partnership & Service —</option>
+      </select>
+    </div>
+
+    <!-- Star Rating -->
+    <div class="form-group">
+      <label class="form-label">Overall Satisfaction Rating <span class="req">*</span></label>
+      <div class="star-rating-box">
+        <div class="stars-row" id="starsContainer">
+          <button type="button" class="star-btn" data-val="1" title="1 Star"><svg viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg></button>
+          <button type="button" class="star-btn" data-val="2" title="2 Stars"><svg viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg></button>
+          <button type="button" class="star-btn" data-val="3" title="3 Stars"><svg viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg></button>
+          <button type="button" class="star-btn" data-val="4" title="4 Stars"><svg viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg></button>
+          <button type="button" class="star-btn" data-val="5" title="5 Stars"><svg viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg></button>
+        </div>
+        <div class="rating-label" id="ratingLabel">Click a star to rate (1–5)</div>
+      </div>
+      <input type="hidden" id="selectedRating" value="0">
+    </div>
+
+    <!-- Review Textarea -->
+    <div class="form-group">
+      <label class="form-label" for="reviewText">Detailed Feedback & Observations <span class="req">*</span></label>
+      <textarea id="reviewText" class="form-control" rows="4" maxlength="1500" required placeholder="Tell us what worked well, areas needing improvement, delivery or performance feedback..." style="width:100%;font-size:13px;line-height:1.5;padding:12px;" oninput="updateCharCount()"></textarea>
+      <div class="char-counter" id="charCounter">0 / 1500 characters</div>
+    </div>
+
+    <!-- Alert Message Area -->
+    <div id="alertBox" style="display:none;padding:10px 14px;border-radius:8px;font-size:13px;margin-bottom:16px;"></div>
+
+    <!-- Submit Button -->
+    <button type="submit" class="btn-submit" id="submitBtn">
+      <span>Submit Customer Feedback</span>
+      <i class="fa-solid fa-paper-plane"></i>
+    </button>
+  </form>
+
+  <!-- Success Confirmation View -->
+  <div class="success-card" id="successCard">
+    <div class="success-icon"><i class="fa-solid fa-check"></i></div>
+    <h2 style="font-size:20px;font-weight:700;color:#0f172a;margin-bottom:8px;">Thank You for Your Feedback!</h2>
+    <p style="font-size:14px;color:#64748b;line-height:1.6;margin-bottom:24px;">Your review has been securely transmitted directly to our Customer Success & Product Quality teams. We appreciate your valuable partnership.</p>
+    <button type="button" class="btn btn-outline" onclick="resetFormForNewEntry()" style="margin:0 auto;padding:10px 22px;font-size:13px;">
+      <i class="fa-solid fa-rotate-left"></i> Submit Another Response
+    </button>
+  </div>
+
+  <div class="trust-badge">
+    <i class="fa-solid fa-lock"></i> Direct Verified Customer Portal &bull; Enterprise Feedback Engine
+  </div>
+</div>
+
+<script>
+let currentRating = 0;
+const ratingDescriptions = {
+  1: '😡 1 Star — Very Dissatisfied (Significant difficulties)',
+  2: '🙁 2 Stars — Dissatisfied (Needs improvement)',
+  3: '😐 3 Stars — Neutral (Met standard expectations)',
+  4: '🙂 4 Stars — Satisfied (High quality & responsive)',
+  5: '🌟 5 Stars — Highly Satisfied (Exceptional experience)'
+};
+
+async function loadOptions() {
+  try {
+    const res = await fetch('/api/feedback/public/options');
+    if (!res.ok) throw new Error('Failed to load client options');
+    const data = await res.json();
+
+    const cSel = document.getElementById('customerId');
+    cSel.innerHTML = '<option value="" disabled selected>— Select Your Organization —</option>';
+    if (data.customers && data.customers.length > 0) {
+      data.customers.forEach(c => {
+        cSel.innerHTML += `<option value="${c.id}">${c.companyName}</option>`;
+      });
+    }
+
+    const pSel = document.getElementById('productId');
+    if (data.products && data.products.length > 0) {
+      data.products.forEach(p => {
+        pSel.innerHTML += `<option value="${p.id}">${p.name}</option>`;
+      });
+    }
+  } catch (err) {
+    showAlert('Unable to initialize survey options: ' + err.message, true);
+  }
+}
+
+function initStars() {
+  const container = document.getElementById('starsContainer');
+  const buttons = container.querySelectorAll('.star-btn');
+  const label = document.getElementById('ratingLabel');
+
+  buttons.forEach(btn => {
+    const val = parseInt(btn.getAttribute('data-val'));
+
+    btn.addEventListener('mouseenter', () => {
+      highlightStars(val);
+      label.textContent = ratingDescriptions[val];
+      label.style.color = '#f59e0b';
+    });
+
+    btn.addEventListener('mouseleave', () => {
+      highlightStars(currentRating);
+      if (currentRating > 0) {
+        label.textContent = ratingDescriptions[currentRating];
+        label.style.color = '#f59e0b';
+      } else {
+        label.textContent = 'Click a star to rate (1–5)';
+        label.style.color = '#64748b';
+      }
+    });
+
+    btn.addEventListener('click', () => {
+      currentRating = val;
+      document.getElementById('selectedRating').value = val;
+      highlightStars(currentRating);
+      label.textContent = ratingDescriptions[currentRating];
+      label.style.color = '#0f172a';
+    });
+  });
+}
+
+function highlightStars(count) {
+  const buttons = document.querySelectorAll('#starsContainer .star-btn');
+  buttons.forEach(btn => {
+    const val = parseInt(btn.getAttribute('data-val'));
+    const svg = btn.querySelector('svg');
+    if (val <= count) {
+      svg.setAttribute('fill', '#f59e0b');
+    } else {
+      svg.setAttribute('fill', 'none');
+    }
+  });
+}
+
+function updateCharCount() {
+  const len = document.getElementById('reviewText').value.length;
+  document.getElementById('charCounter').textContent = `${len} / 1500 characters`;
+}
+
+function showAlert(msg, isError) {
+  const box = document.getElementById('alertBox');
+  box.style.display = 'block';
+  box.textContent = msg;
+  if (isError) {
+    box.style.background = '#fef2f2';
+    box.style.border = '1px solid #fecaca';
+    box.style.color = '#ef4444';
+  } else {
+    box.style.background = '#ecfdf5';
+    box.style.border = '1px solid #a7f3d0';
+    box.style.color = '#10b981';
+  }
+}
+
+document.getElementById('publicFeedbackForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const alertBox = document.getElementById('alertBox');
+  alertBox.style.display = 'none';
+
+  const custId = document.getElementById('customerId').value;
+  const prodId = document.getElementById('productId').value;
+  const rating = parseInt(document.getElementById('selectedRating').value);
+  const review = document.getElementById('reviewText').value.trim();
+
+  if (!custId) {
+    showAlert('Please select your organization/client account.', true);
+    return;
+  }
+  if (!rating || rating < 1 || rating > 5) {
+    showAlert('Please provide a star rating between 1 and 5.', true);
+    return;
+  }
+  if (!review) {
+    showAlert('Please enter your review comments.', true);
+    return;
+  }
+
+  const submitBtn = document.getElementById('submitBtn');
+  submitBtn.disabled = true;
+  submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Submitting Review...';
+
+  try {
+    const payload = {
+      customerId: parseInt(custId),
+      productId: prodId ? parseInt(prodId) : null,
+      rating: rating,
+      reviewText: review
+    };
+
+    const res = await fetch('/api/feedback/public', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.message || 'Failed to submit review');
+    }
+
+    document.getElementById('publicFeedbackForm').style.display = 'none';
+    document.getElementById('successCard').style.display = 'block';
+  } catch (err) {
+    showAlert(err.message, true);
+    submitBtn.disabled = false;
+    submitBtn.innerHTML = '<span>Submit Customer Feedback</span> <i class="fa-solid fa-paper-plane"></i>';
+  }
+});
+
+function resetFormForNewEntry() {
+  document.getElementById('publicFeedbackForm').reset();
+  currentRating = 0;
+  document.getElementById('selectedRating').value = '0';
+  highlightStars(0);
+  document.getElementById('ratingLabel').textContent = 'Click a star to rate (1–5)';
+  document.getElementById('ratingLabel').style.color = '#64748b';
+  updateCharCount();
+  document.getElementById('alertBox').style.display = 'none';
+  const submitBtn = document.getElementById('submitBtn');
+  submitBtn.disabled = false;
+  submitBtn.innerHTML = '<span>Submit Customer Feedback</span> <i class="fa-solid fa-paper-plane"></i>';
+  document.getElementById('successCard').style.display = 'none';
+  document.getElementById('publicFeedbackForm').style.display = 'block';
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  loadOptions();
+  initStars();
+});
+</script>
+</body>
+</html>

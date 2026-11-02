@@ -4,7 +4,9 @@ import com.company.cms.dto.CustomerDtos.*;
 import com.company.cms.entity.Customer;
 import com.company.cms.exception.ConflictException;
 import com.company.cms.exception.ResourceNotFoundException;
+import com.company.cms.repository.CustomerFeedbackRepository;
 import com.company.cms.repository.CustomerRepository;
+import com.company.cms.repository.SalesOrderRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -15,19 +17,22 @@ import java.util.stream.Collectors;
 public class CustomerService {
 
     private final CustomerRepository customerRepository;
-    private final com.company.cms.repository.SalesOrderRepository salesOrderRepository;
+    private final SalesOrderRepository salesOrderRepository;
+    private final CustomerFeedbackRepository customerFeedbackRepository;
 
     public CustomerService(
             CustomerRepository customerRepository,
-            com.company.cms.repository.SalesOrderRepository salesOrderRepository
+            SalesOrderRepository salesOrderRepository,
+            CustomerFeedbackRepository customerFeedbackRepository
     ) {
         this.customerRepository = customerRepository;
         this.salesOrderRepository = salesOrderRepository;
+        this.customerFeedbackRepository = customerFeedbackRepository;
     }
 
     public List<CustomerResponse> getAllCustomers(String region) {
         List<Customer> list = (region != null && !region.isBlank() && !region.equalsIgnoreCase("ALL"))
-                ? customerRepository.findByRegion(region)
+                ? customerRepository.findByRegionIgnoreCase(region)
                 : customerRepository.findAll();
 
         return list.stream().map(this::mapToResponse).collect(Collectors.toList());
@@ -49,7 +54,7 @@ public class CustomerService {
         c.setContactName(request.getContactName());
         c.setEmail(request.getEmail());
         c.setPhone(request.getPhone());
-        c.setRegion(request.getRegion());
+        c.setRegion(request.getRegion().toUpperCase());
 
         c = customerRepository.save(c);
         return mapToResponse(c);
@@ -68,7 +73,7 @@ public class CustomerService {
         c.setContactName(request.getContactName());
         c.setEmail(request.getEmail());
         c.setPhone(request.getPhone());
-        c.setRegion(request.getRegion());
+        c.setRegion(request.getRegion().toUpperCase());
 
         c = customerRepository.save(c);
         return mapToResponse(c);
@@ -82,6 +87,12 @@ public class CustomerService {
         var orders = salesOrderRepository.findByCustomerId(id);
         if (!orders.isEmpty()) {
             throw new ConflictException("Cannot delete customer '" + c.getCompanyName() + "' because they have " + orders.size() + " active sales orders. Please cancel or reassign orders first.");
+        }
+
+        // Clean up any linked customer feedback
+        var feedbacks = customerFeedbackRepository.findByCustomerId(id);
+        if (!feedbacks.isEmpty()) {
+            customerFeedbackRepository.deleteAll(feedbacks);
         }
 
         customerRepository.delete(c);

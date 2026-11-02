@@ -6,6 +6,7 @@ import com.company.cms.exception.ConflictException;
 import com.company.cms.exception.ResourceNotFoundException;
 import com.company.cms.repository.DepartmentRepository;
 import com.company.cms.repository.EmployeeRepository;
+import com.company.cms.repository.ProjectRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -17,10 +18,16 @@ public class DepartmentService {
 
     private final DepartmentRepository departmentRepository;
     private final EmployeeRepository employeeRepository;
+    private final ProjectRepository projectRepository;
 
-    public DepartmentService(DepartmentRepository departmentRepository, EmployeeRepository employeeRepository) {
+    public DepartmentService(
+            DepartmentRepository departmentRepository,
+            EmployeeRepository employeeRepository,
+            ProjectRepository projectRepository
+    ) {
         this.departmentRepository = departmentRepository;
         this.employeeRepository = employeeRepository;
+        this.projectRepository = projectRepository;
     }
 
     public List<DepartmentResponse> getAllDepartments() {
@@ -67,7 +74,12 @@ public class DepartmentService {
 
         long employeeCount = employeeRepository.countByDepartmentId(id);
         if (employeeCount > 0) {
-            throw new ConflictException("Cannot delete department '" + dept.getName() + "' because it has " + employeeCount + " assigned employees.");
+            throw new ConflictException("Cannot delete department '" + dept.getName() + "' because it has " + employeeCount + " assigned employees. Please reassign staff first.");
+        }
+
+        var projects = projectRepository.findByDepartmentId(id);
+        if (!projects.isEmpty()) {
+            throw new ConflictException("Cannot delete department '" + dept.getName() + "' because it has " + projects.size() + " active projects. Please reassign or delete projects first.");
         }
 
         departmentRepository.delete(dept);

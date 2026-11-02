@@ -19,7 +19,7 @@ public class CustomerDtos {
         private String phone;
 
         @NotBlank(message = "Region is required")
-        @Pattern(regexp = "^(North|South|East|West|Central)$", message = "Region must be North, South, East, West, or Central")
+        @Pattern(regexp = "(?i)^(NORTH|SOUTH|EAST|WEST|CENTRAL)$", message = "Region must be NORTH, SOUTH, EAST, WEST, or CENTRAL")
         private String region;
 
         public String getCompanyName() { return companyName; }

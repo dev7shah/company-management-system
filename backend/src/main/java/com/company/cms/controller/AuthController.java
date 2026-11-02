@@ -56,6 +56,24 @@ public class AuthController {
         return ResponseEntity.ok(authService.listUsers());
     }
 
+    @GetMapping("/users/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    @Operation(summary = "Admin: Get user account details by ID")
+    public ResponseEntity<UserResponse> getUserById(@PathVariable Long id) {
+        return ResponseEntity.ok(authService.getUserById(id));
+    }
+
+    @PutMapping("/users/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    @Operation(summary = "Admin: Update user account")
+    public ResponseEntity<UserResponse> updateUser(
+            @PathVariable Long id,
+            @Valid @RequestBody UpdateUserRequest request,
+            @AuthenticationPrincipal UserDetails userDetails
+    ) {
+        return ResponseEntity.ok(authService.updateUser(id, request, userDetails != null ? userDetails.getUsername() : null));
+    }
+
     @PatchMapping("/users/{id}/toggle")
     @PreAuthorize("hasRole('ADMIN')")
     @Operation(summary = "Admin: Activate or deactivate a user account")

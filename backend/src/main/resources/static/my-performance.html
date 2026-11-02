@@ -11,37 +11,39 @@
   <link rel="stylesheet" href="/css/style.css">
   <style>
     .profile-hero {
-      background: linear-gradient(135deg, #1e1b4b 0%, #312e81 50%, #4338ca 100%);
-      border-radius: var(--radius-lg);
-      padding: 32px;
-      color: white;
-      margin-bottom: 28px;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      padding: 24px 28px;
+      color: var(--text-main);
+      margin-bottom: 24px;
       display: flex;
       align-items: center;
       justify-content: space-between;
       flex-wrap: wrap;
-      gap: 24px;
-      box-shadow: 0 10px 25px -5px rgba(49, 46, 129, 0.35);
+      gap: 20px;
+      box-shadow: var(--card-shadow);
     }
     .profile-avatar-large {
-      width: 72px;
-      height: 72px;
+      width: 64px;
+      height: 64px;
       border-radius: 50%;
       background: linear-gradient(135deg, #06b6d4, #3b82f6);
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 28px;
+      font-size: 24px;
       font-weight: 800;
       color: white;
-      box-shadow: 0 4px 15px rgba(6, 182, 212, 0.4);
+      box-shadow: 0 4px 12px rgba(6, 182, 212, 0.35);
       flex-shrink: 0;
     }
     .profile-details h2 {
-      font-size: 24px;
+      font-size: 22px;
       font-weight: 800;
-      letter-spacing: -0.5px;
-      margin-bottom: 6px;
+      letter-spacing: -0.4px;
+      color: var(--text-main);
+      margin-bottom: 4px;
     }
     .profile-meta {
       display: flex;
@@ -49,7 +51,7 @@
       gap: 16px;
       flex-wrap: wrap;
       font-size: 13px;
-      color: #c7d2fe;
+      color: var(--text-muted);
     }
     .profile-meta span {
       display: inline-flex;

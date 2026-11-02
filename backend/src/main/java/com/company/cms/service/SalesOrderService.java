@@ -26,19 +26,22 @@ public class SalesOrderService {
     private final EmployeeRepository employeeRepository;
     private final ProductRepository productRepository;
     private final OrderStatusHistoryRepository statusHistoryRepository;
+    private final AnalyticsClientService analyticsClientService;
 
     public SalesOrderService(
             SalesOrderRepository salesOrderRepository,
             CustomerRepository customerRepository,
             EmployeeRepository employeeRepository,
             ProductRepository productRepository,
-            OrderStatusHistoryRepository statusHistoryRepository
+            OrderStatusHistoryRepository statusHistoryRepository,
+            AnalyticsClientService analyticsClientService
     ) {
         this.salesOrderRepository = salesOrderRepository;
         this.customerRepository = customerRepository;
         this.employeeRepository = employeeRepository;
         this.productRepository = productRepository;
         this.statusHistoryRepository = statusHistoryRepository;
+        this.analyticsClientService = analyticsClientService;
     }
 
     @Transactional(readOnly = true)
@@ -52,7 +55,7 @@ public class SalesOrderService {
         } else if (status != null) {
             orders = salesOrderRepository.findByStatus(status);
         } else if (region != null && !region.isBlank() && !region.equalsIgnoreCase("ALL")) {
-            orders = salesOrderRepository.findByRegion(region);
+            orders = salesOrderRepository.findByRegionIgnoreCase(region);
         } else {
             orders = salesOrderRepository.findAll();
         }
@@ -138,6 +141,9 @@ public class SalesOrderService {
         OrderStatusHistory history = new OrderStatusHistory(order, null, OrderStatus.INQUIRY, username != null ? username : "System");
         statusHistoryRepository.save(history);
 
+        // Real-time synchronization with Analytics Data Warehouse
+        analyticsClientService.syncOrderToAnalytics(order);
+
         return mapToResponse(order);
     }
 
@@ -158,7 +164,22 @@ public class SalesOrderService {
         OrderStatusHistory history = new OrderStatusHistory(order, currentStatus, newStatus, username);
         statusHistoryRepository.save(history);
 
+        // Real-time synchronization with Analytics Data Warehouse
+        analyticsClientService.syncOrderToAnalytics(order);
+
         return mapToResponse(order);
+    }
+
+    @Transactional
+    public void deleteOrder(Long id, Role role) {
+        SalesOrder order = salesOrderRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Sales Order not found with id: " + id));
+
+        if (order.getStatus() == OrderStatus.DELIVERED) {
+            throw new ConflictException("Cannot delete fulfilled order '" + order.getOrderNumber() + "'. Fulfilled orders are part of permanent financial audit trails.");
+        }
+
+        salesOrderRepository.delete(order);
     }
 
     private SalesOrderResponse mapToResponse(SalesOrder order) {

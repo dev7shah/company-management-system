@@ -43,6 +43,20 @@ public class FeedbackService {
         return list.stream().map(this::mapToResponse).collect(Collectors.toList());
     }
 
+    public PublicFeedbackOptions getPublicFeedbackOptions() {
+        List<CustomerOption> customers = customerRepository.findAll().stream()
+                .map(c -> new CustomerOption(c.getId(), c.getCompanyName()))
+                .sorted((a, b) -> a.getCompanyName().compareToIgnoreCase(b.getCompanyName()))
+                .collect(Collectors.toList());
+
+        List<ProductOption> products = productRepository.findByActiveTrue().stream()
+                .map(p -> new ProductOption(p.getId(), p.getName()))
+                .sorted((a, b) -> a.getName().compareToIgnoreCase(b.getName()))
+                .collect(Collectors.toList());
+
+        return new PublicFeedbackOptions(customers, products);
+    }
+
     @Transactional
     public FeedbackResponse createFeedback(FeedbackRequest request) {
         Customer customer = customerRepository.findById(request.getCustomerId())
@@ -60,6 +74,45 @@ public class FeedbackService {
         fb.setReviewText(request.getReviewText());
 
         // Basic sentiment heuristics before ETL runs full NLP
+        if (request.getRating() >= 4) {
+            fb.setSentimentLabel("POSITIVE");
+            fb.setSentimentScore(0.75);
+        } else if (request.getRating() == 3) {
+            fb.setSentimentLabel("NEUTRAL");
+            fb.setSentimentScore(0.0);
+        } else {
+            fb.setSentimentLabel("NEGATIVE");
+            fb.setSentimentScore(-0.65);
+        }
+
+        fb = feedbackRepository.save(fb);
+        return mapToResponse(fb);
+    }
+
+    public FeedbackResponse getFeedbackById(Long id) {
+        CustomerFeedback fb = feedbackRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Feedback not found with id: " + id));
+        return mapToResponse(fb);
+    }
+
+    @Transactional
+    public FeedbackResponse updateFeedback(Long id, FeedbackRequest request) {
+        CustomerFeedback fb = feedbackRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Feedback not found with id: " + id));
+
+        Customer customer = customerRepository.findById(request.getCustomerId())
+                .orElseThrow(() -> new ResourceNotFoundException("Customer not found with id: " + request.getCustomerId()));
+
+        Product product = null;
+        if (request.getProductId() != null) {
+            product = productRepository.findById(request.getProductId()).orElse(null);
+        }
+
+        fb.setCustomer(customer);
+        fb.setProduct(product);
+        fb.setRating(request.getRating());
+        fb.setReviewText(request.getReviewText());
+
         if (request.getRating() >= 4) {
             fb.setSentimentLabel("POSITIVE");
             fb.setSentimentScore(0.75);

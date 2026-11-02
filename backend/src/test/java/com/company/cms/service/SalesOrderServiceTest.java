@@ -33,6 +33,8 @@ class SalesOrderServiceTest {
     private EmployeeRepository employeeRepository;
     @Mock
     private OrderStatusHistoryRepository statusHistoryRepository;
+    @Mock
+    private AnalyticsClientService analyticsClientService;
 
     @InjectMocks
     private SalesOrderService salesOrderService;

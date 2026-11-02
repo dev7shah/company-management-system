@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>CMS — Customer Feedback & Sentiment</title>
+  <title>CMS — Customer Feedback & Sentiment Moderation</title>
   <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -31,108 +31,235 @@
   </aside>
   <main class="main-wrapper">
     <header class="top-navbar">
-      <div class="page-title-area"><h1>Customer Feedback & Sentiment</h1><p>Voice of customer reviews, NLP sentiment analysis, and CSAT scores</p></div>
-      <div class="top-actions"><button class="btn btn-primary btn-sm" onclick="openModal()"><i class="fa-solid fa-plus"></i> Submit Feedback</button></div>
+      <div class="page-title-area">
+        <h1>Customer Feedback & Sentiment</h1>
+        <p>Verified voice-of-customer reviews, NLP sentiment analysis, and CSAT moderation</p>
+      </div>
+      <div class="top-actions" style="display:flex;gap:10px;align-items:center;">
+        <button class="btn btn-outline btn-sm" onclick="copySurveyLink()"><i class="fa-solid fa-copy"></i> Copy Survey Link</button>
+        <a href="/customer-review.html" target="_blank" class="btn btn-primary btn-sm"><i class="fa-solid fa-arrow-up-right-from-square"></i> Open Customer Portal</a>
+      </div>
     </header>
+
     <div class="content-body">
-      <!-- Summary Stats -->
-      <div class="stats-grid" style="grid-template-columns:repeat(4,1fr);">
-        <div class="stat-card stat-card-border-success"><div class="stat-header"><span class="stat-label">Avg Rating</span><div class="stat-icon stat-icon-success"><i class="fa-solid fa-star"></i></div></div><div class="stat-value" id="avgRating">—</div></div>
-        <div class="stat-card stat-card-border-primary"><div class="stat-header"><span class="stat-label">Total Reviews</span><div class="stat-icon stat-icon-primary"><i class="fa-solid fa-comments"></i></div></div><div class="stat-value" id="totalReviews">0</div></div>
-        <div class="stat-card stat-card-border-info"><div class="stat-header"><span class="stat-label">Positive %</span><div class="stat-icon stat-icon-info"><i class="fa-solid fa-face-smile"></i></div></div><div class="stat-value" id="positivePct">—</div></div>
-        <div class="stat-card stat-card-border-warning"><div class="stat-header"><span class="stat-label">Negative %</span><div class="stat-icon stat-icon-warning"><i class="fa-solid fa-face-frown"></i></div></div><div class="stat-value" id="negativePct">—</div></div>
+      <!-- Info notice explaining customer submission model -->
+      <div style="background:rgba(59,130,246,0.08);border:1px solid rgba(59,130,246,0.25);border-radius:10px;padding:12px 18px;margin-bottom:20px;display:flex;align-items:center;justify-content:space-between;gap:15px;">
+        <div style="display:flex;align-items:center;gap:12px;">
+          <div style="width:36px;height:36px;border-radius:8px;background:rgba(59,130,246,0.15);color:var(--primary-color);display:flex;align-items:center;justify-content:center;font-size:16px;">
+            <i class="fa-solid fa-shield-halved"></i>
+          </div>
+          <div>
+            <div style="font-weight:600;font-size:13px;color:var(--text-main);">Customer Feedback Intake Integrity</div>
+            <div style="font-size:12px;color:var(--text-muted);">Feedback can only be submitted directly by customers through the dedicated Client Review Portal. CMS employees cannot fabricate or log reviews internally.</div>
+          </div>
+        </div>
+        <a href="/customer-review.html" target="_blank" style="font-size:12px;font-weight:600;color:var(--primary-color);white-space:nowrap;text-decoration:none;">View Form <i class="fa-solid fa-chevron-right" style="font-size:10px;"></i></a>
       </div>
 
+      <!-- Summary Stats -->
+      <div class="stats-grid" style="grid-template-columns:repeat(4,1fr);margin-bottom:20px;">
+        <div class="stat-card stat-card-border-success"><div class="stat-header"><span class="stat-label">Avg CSAT Rating</span><div class="stat-icon stat-icon-success"><i class="fa-solid fa-star"></i></div></div><div class="stat-value" id="avgRating">—</div></div>
+        <div class="stat-card stat-card-border-primary"><div class="stat-header"><span class="stat-label">Total Reviews</span><div class="stat-icon stat-icon-primary"><i class="fa-solid fa-comments"></i></div></div><div class="stat-value" id="totalReviews">0</div></div>
+        <div class="stat-card stat-card-border-info"><div class="stat-header"><span class="stat-label">Positive Sentiment</span><div class="stat-icon stat-icon-info"><i class="fa-solid fa-face-smile"></i></div></div><div class="stat-value" id="positivePct">—</div></div>
+        <div class="stat-card stat-card-border-warning"><div class="stat-header"><span class="stat-label">Negative / At-Risk</span><div class="stat-icon stat-icon-warning"><i class="fa-solid fa-triangle-exclamation"></i></div></div><div class="stat-value" id="negativePct">—</div></div>
+      </div>
+
+      <!-- Filter Bar -->
+      <div class="card-box" style="margin-bottom:18px;padding:14px 20px;">
+        <div style="display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px;">
+          <div style="display:flex;align-items:center;gap:10px;flex:1;min-width:260px;">
+            <div style="position:relative;width:100%;max-width:320px;">
+              <i class="fa-solid fa-magnifying-glass" style="position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--text-muted);font-size:13px;"></i>
+              <input type="text" id="searchInput" class="form-control" placeholder="Search reviews, clients, products..." style="padding-left:34px;font-size:13px;" oninput="applyFilters()">
+            </div>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+            <select id="filterRating" class="form-select" style="font-size:13px;min-width:130px;" onchange="applyFilters()">
+              <option value="">All Ratings</option>
+              <option value="5">5 Stars (★★★★★)</option>
+              <option value="4">4 Stars (★★★★☆)</option>
+              <option value="3">3 Stars (★★★☆☆)</option>
+              <option value="2">2 Stars (★★☆☆☆)</option>
+              <option value="1">1 Star  (★☆☆☆☆)</option>
+            </select>
+            <select id="filterSentiment" class="form-select" style="font-size:13px;min-width:140px;" onchange="applyFilters()">
+              <option value="">All Sentiments</option>
+              <option value="POSITIVE">Positive</option>
+              <option value="NEUTRAL">Neutral</option>
+              <option value="NEGATIVE">Negative</option>
+            </select>
+            <select id="filterProduct" class="form-select" style="font-size:13px;min-width:150px;" onchange="applyFilters()">
+              <option value="">All Products</option>
+            </select>
+            <button class="btn btn-outline btn-sm" onclick="resetFilters()"><i class="fa-solid fa-rotate-left"></i> Reset</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Reviews Table -->
       <div class="card-box"><div class="card-box-body" style="padding:0;">
         <table class="custom-table">
-          <thead><tr><th>Customer</th><th>Product</th><th>Rating</th><th>Review</th><th>Sentiment</th><th>Date</th><th style="text-align:right">Actions</th></tr></thead>
-          <tbody id="fbTbody"><tr><td colspan="7" style="text-align:center;padding:30px;color:var(--text-muted);">Loading reviews...</td></tr></tbody>
+          <thead>
+            <tr>
+              <th>Customer</th>
+              <th>Product / Solution</th>
+              <th>Rating</th>
+              <th style="min-width:280px;">Customer Review</th>
+              <th>Sentiment & Score</th>
+              <th>Date</th>
+              <th style="text-align:right">Moderation</th>
+            </tr>
+          </thead>
+          <tbody id="fbTbody">
+            <tr><td colspan="7" style="text-align:center;padding:30px;color:var(--text-muted);">Loading reviews...</td></tr>
+          </tbody>
         </table>
       </div></div>
     </div>
   </main>
 </div>
 
-<div class="modal-overlay" id="fbModal">
-  <div class="modal-card">
-    <div class="modal-header"><h3 style="font-size:16px;font-weight:700;">Submit Customer Feedback</h3><button onclick="closeModal()" style="background:transparent;border:none;font-size:20px;cursor:pointer;">&times;</button></div>
-    <form id="fbForm">
-      <div class="modal-body">
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
-          <div><label class="form-label">Customer *</label><select id="fbCustomerId" class="form-select" required style="width:100%;"></select></div>
-          <div><label class="form-label">Product</label><select id="fbProductId" class="form-select" style="width:100%;"><option value="">— None —</option></select></div>
-        </div>
-        <div><label class="form-label">Rating (1–5) *</label><input type="number" id="fbRating" class="form-control" min="1" max="5" required style="width:100%;"></div>
-        <div><label class="form-label">Review Text *</label><textarea id="fbText" class="form-control" rows="3" required style="width:100%;"></textarea></div>
-      </div>
-      <div class="modal-footer"><button type="button" class="btn btn-outline" onclick="closeModal()">Cancel</button><button type="submit" class="btn btn-primary">Submit</button></div>
-    </form>
-  </div>
-</div>
-
 <script src="/js/app.js"></script>
 <script>
-async function init(){
-  try{
-    const customers=await CMS.fetchApi('/api/customers');
-    const products=await CMS.fetchApi('/api/products');
-    const cSel=document.getElementById('fbCustomerId');
-    customers.forEach(c=>{cSel.innerHTML+=`<option value="${c.id}">${c.companyName}</option>`;});
-    const pSel=document.getElementById('fbProductId');
-    products.forEach(p=>{pSel.innerHTML+=`<option value="${p.id}">${p.name}</option>`;});
-    await loadFeedback();
-  }catch(e){CMS.showToast(e.message,'error');}
-}
+let allFeedback = [];
+let allProducts = [];
 
-async function loadFeedback(){
-  try{
-    const list=await CMS.fetchApi('/api/feedback');
-    const tb=document.getElementById('fbTbody');tb.innerHTML='';
-    const user=CMS.getUser();const isAdmin=user&&user.role==='ADMIN';
-
-    if(list.length){
-      let sumR=0,pos=0,neg=0;
-      list.forEach(f=>{sumR+=f.rating;if(f.sentimentLabel==='POSITIVE')pos++;if(f.sentimentLabel==='NEGATIVE')neg++;});
-      document.getElementById('avgRating').textContent=(sumR/list.length).toFixed(1)+' / 5';
-      document.getElementById('totalReviews').textContent=list.length;
-      document.getElementById('positivePct').textContent=((pos/list.length)*100).toFixed(0)+'%';
-      document.getElementById('negativePct').textContent=((neg/list.length)*100).toFixed(0)+'%';
-    }
-
-    const renderStars = (rating) => {
-      let s = '';
-      for (let i = 1; i <= 5; i++) {
-        const isFilled = i <= rating;
-        s += `<svg style="width:13px;height:13px;vertical-align:-1px;margin-right:2px;" viewBox="0 0 24 24" fill="${isFilled ? '#f59e0b' : 'none'}" stroke="#f59e0b" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>`;
-      }
-      return s;
-    };
-
-    list.forEach(f=>{
-      const tr=document.createElement('tr');
-      tr.innerHTML=`<td><strong>${f.customerName}</strong></td><td>${f.productName||'General'}</td>
-        <td><span>${renderStars(f.rating)}</span></td>
-        <td style="max-width:280px;font-size:13px;color:var(--text-muted);">"${f.reviewText}"</td>
-        <td>${CMS.getStatusBadge(f.sentimentLabel)} <span style="font-size:11px;color:var(--text-muted);">${f.sentimentScore!=null?f.sentimentScore.toFixed(2):''}</span></td>
-        <td>${CMS.formatDate(f.createdAt)}</td>
-        <td style="text-align:right;">${isAdmin?`<button class="btn btn-outline btn-sm" style="color:var(--danger);" onclick="delFb(${f.id})"><i class="fa-solid fa-trash"></i></button>`:''}</td>`;
-      tb.appendChild(tr);
+async function init() {
+  try {
+    const products = await CMS.fetchApi('/api/products');
+    allProducts = products || [];
+    const pSel = document.getElementById('filterProduct');
+    allProducts.forEach(p => {
+      pSel.innerHTML += `<option value="${p.id}">${p.name}</option>`;
     });
-  }catch(e){CMS.showToast(e.message,'error');}
+    await loadFeedback();
+  } catch (e) {
+    CMS.showToast(e.message, 'error');
+  }
 }
 
-function openModal(){document.getElementById('fbForm').reset();document.getElementById('fbModal').style.display='flex';}
-function closeModal(){document.getElementById('fbModal').style.display='none';}
+async function loadFeedback() {
+  try {
+    allFeedback = await CMS.fetchApi('/api/feedback');
+    updateStats(allFeedback);
+    applyFilters();
+  } catch (e) {
+    CMS.showToast(e.message, 'error');
+  }
+}
 
-document.getElementById('fbForm').addEventListener('submit',async e=>{
-  e.preventDefault();
-  const payload={customerId:parseInt(document.getElementById('fbCustomerId').value),productId:document.getElementById('fbProductId').value?parseInt(document.getElementById('fbProductId').value):null,rating:parseInt(document.getElementById('fbRating').value),reviewText:document.getElementById('fbText').value.trim()};
-  try{await CMS.fetchApi('/api/feedback',{method:'POST',body:JSON.stringify(payload)});CMS.showToast('Feedback submitted','success');closeModal();loadFeedback();}catch(e){CMS.showToast(e.message,'error');}
-});
+function updateStats(list) {
+  if (!list || list.length === 0) {
+    document.getElementById('avgRating').textContent = '—';
+    document.getElementById('totalReviews').textContent = '0';
+    document.getElementById('positivePct').textContent = '—';
+    document.getElementById('negativePct').textContent = '—';
+    return;
+  }
+  let sumR = 0, pos = 0, neg = 0;
+  list.forEach(f => {
+    sumR += f.rating;
+    if (f.sentimentLabel === 'POSITIVE') pos++;
+    if (f.sentimentLabel === 'NEGATIVE') neg++;
+  });
+  document.getElementById('avgRating').textContent = (sumR / list.length).toFixed(1) + ' / 5';
+  document.getElementById('totalReviews').textContent = list.length;
+  document.getElementById('positivePct').textContent = ((pos / list.length) * 100).toFixed(0) + '%';
+  document.getElementById('negativePct').textContent = ((neg / list.length) * 100).toFixed(0) + '%';
+}
 
-async function delFb(id){if(!confirm('Delete this feedback?'))return;try{await CMS.fetchApi(`/api/feedback/${id}`,{method:'DELETE'});CMS.showToast('Deleted','success');loadFeedback();}catch(e){CMS.showToast(e.message,'error');}}
+function renderStars(rating) {
+  let s = '';
+  for (let i = 1; i <= 5; i++) {
+    const isFilled = i <= rating;
+    s += `<svg style="width:13px;height:13px;vertical-align:-1px;margin-right:2px;" viewBox="0 0 24 24" fill="${isFilled ? '#f59e0b' : 'none'}" stroke="#f59e0b" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>`;
+  }
+  return s;
+}
 
-document.addEventListener('DOMContentLoaded',init);
+function applyFilters() {
+  const q = document.getElementById('searchInput').value.trim().toLowerCase();
+  const r = document.getElementById('filterRating').value;
+  const s = document.getElementById('filterSentiment').value;
+  const p = document.getElementById('filterProduct').value;
+
+  const filtered = allFeedback.filter(f => {
+    if (r && f.rating !== parseInt(r)) return false;
+    if (s && f.sentimentLabel !== s) return false;
+    if (p && f.productId !== parseInt(p)) return false;
+    if (q) {
+      const matchCust = f.customerName && f.customerName.toLowerCase().includes(q);
+      const matchProd = f.productName && f.productName.toLowerCase().includes(q);
+      const matchText = f.reviewText && f.reviewText.toLowerCase().includes(q);
+      if (!matchCust && !matchProd && !matchText) return false;
+    }
+    return true;
+  });
+
+  renderTable(filtered);
+}
+
+function resetFilters() {
+  document.getElementById('searchInput').value = '';
+  document.getElementById('filterRating').value = '';
+  document.getElementById('filterSentiment').value = '';
+  document.getElementById('filterProduct').value = '';
+  applyFilters();
+}
+
+function renderTable(list) {
+  const tb = document.getElementById('fbTbody');
+  tb.innerHTML = '';
+  const user = CMS.getUser();
+  const isAdmin = user && user.role === 'ADMIN';
+
+  if (!list || list.length === 0) {
+    tb.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:36px;color:var(--text-muted);font-size:13px;">No customer reviews match your filter criteria.</td></tr>';
+    return;
+  }
+
+  list.forEach(f => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td><strong>${f.customerName || 'Customer #' + f.customerId}</strong></td>
+      <td><span class="badge" style="background:var(--bg-secondary);border:1px solid var(--border-color);">${f.productName || 'General Experience'}</span></td>
+      <td><span>${renderStars(f.rating)}</span> <span style="font-size:12px;font-weight:600;margin-left:4px;">${f.rating}.0</span></td>
+      <td style="max-width:380px;font-size:13px;line-height:1.45;color:var(--text-main);">"${f.reviewText}"</td>
+      <td>
+        ${CMS.getStatusBadge(f.sentimentLabel)}
+        <span style="font-size:11px;color:var(--text-muted);margin-left:4px;">${f.sentimentScore != null ? (f.sentimentScore > 0 ? '+' : '') + f.sentimentScore.toFixed(2) : ''}</span>
+      </td>
+      <td>${CMS.formatDate(f.createdAt)}</td>
+      <td style="text-align:right;">
+        ${isAdmin ? `<button class="btn btn-outline btn-sm" style="color:var(--danger);border-color:rgba(239,68,68,0.3);" title="Moderate / Delete Review" onclick="delFb(${f.id})"><i class="fa-solid fa-trash"></i></button>` : '<span style="color:var(--text-muted);font-size:11px;">Protected</span>'}
+      </td>`;
+    tb.appendChild(tr);
+  });
+}
+
+function copySurveyLink() {
+  const surveyUrl = window.location.origin + '/customer-review.html';
+  navigator.clipboard.writeText(surveyUrl).then(() => {
+    CMS.showToast('Customer Survey URL copied to clipboard: ' + surveyUrl, 'success');
+  }).catch(() => {
+    prompt('Copy customer survey URL:', surveyUrl);
+  });
+}
+
+async function delFb(id) {
+  if (!confirm('Are you sure you want to permanently delete this customer review entry? This action is logged for moderation auditing.')) return;
+  try {
+    await CMS.fetchApi(`/api/feedback/${id}`, { method: 'DELETE' });
+    CMS.showToast('Review removed from repository', 'success');
+    allFeedback = allFeedback.filter(f => f.id !== id);
+    updateStats(allFeedback);
+    applyFilters();
+  } catch (e) {
+    CMS.showToast(e.message, 'error');
+  }
+}
+
+document.addEventListener('DOMContentLoaded', init);
 </script>
 </body>
 </html>

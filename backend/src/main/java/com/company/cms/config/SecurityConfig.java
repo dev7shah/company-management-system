@@ -94,11 +94,14 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.PATCH, "/api/orders/*/status").hasAnyRole("ADMIN", "MANAGER")
                 .requestMatchers("/api/orders/**").authenticated()
 
-                // Feedback
+                // Feedback (Public intake + Admin/Manager moderation)
+                .requestMatchers(HttpMethod.POST, "/api/feedback/public").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/feedback/public/**").permitAll()
                 .requestMatchers(HttpMethod.DELETE, "/api/feedback/**").hasRole("ADMIN")
                 .requestMatchers("/api/feedback/**").hasAnyRole("ADMIN", "MANAGER")
 
                 // Analytics
+                .requestMatchers("/api/analytics/internal/**").permitAll()
                 .requestMatchers("/api/analytics/etl/**").hasRole("ADMIN")
                 .requestMatchers("/api/analytics/my-performance").authenticated()
                 .requestMatchers("/api/analytics/**").hasAnyRole("ADMIN", "MANAGER")

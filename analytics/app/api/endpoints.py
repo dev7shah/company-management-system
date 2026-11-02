@@ -1,7 +1,7 @@
 import hmac
 import logging
 from typing import Optional
-from fastapi import APIRouter, Depends, Header, HTTPException, Query
+from fastapi import APIRouter, Depends, Header, HTTPException, Query, Body
 from ..config import settings
 from ..etl.pipeline import run_etl_pipeline
 from ..models.forecast import compute_sales_forecast
@@ -15,6 +15,7 @@ from ..charts.plotly_builder import (
     build_unified_report
 )
 from ..charts.seaborn_builder import generate_seaborn_plots
+from ..etl.live_sync import sync_operational_order, sync_all_operational_orders
 
 logger = logging.getLogger("cms_analytics.endpoints")
 router = APIRouter()
@@ -65,9 +66,10 @@ def get_kpis(
 def get_sales_trend(
     region: Optional[str] = Query(None),
     category: Optional[str] = Query(None),
+    metric: Optional[str] = Query("all"),
     _=Depends(verify_internal_key)
 ):
-    return build_sales_trend_chart(region, category)
+    return build_sales_trend_chart(region, category, metric)
 
 @router.get("/analytics/regional")
 def get_regional(
@@ -115,3 +117,11 @@ def get_unified_report(
 @router.get("/analytics/advanced-plots")
 def get_advanced_plots(_=Depends(verify_internal_key)):
     return generate_seaborn_plots()
+
+@router.post("/analytics/sync-order")
+def sync_order(order: dict = Body(...), _=Depends(verify_internal_key)):
+    return sync_operational_order(order)
+
+@router.post("/analytics/sync-all-orders")
+def sync_all_orders(orders: list = Body(...), _=Depends(verify_internal_key)):
+    return sync_all_operational_orders(orders)

@@ -231,6 +231,12 @@
             <i class="fa-solid ${u.active ? 'fa-user-slash' : 'fa-user-check'}"></i> ${u.active ? 'Deactivate' : 'Activate'}
            </button>`;
 
+      const deleteBtn = isSelf
+        ? ''
+        : `<button class="btn btn-sm" style="background:#fee2e2; color:#b91c1c; border:1px solid #fecaca;" onclick="deleteUser(${u.id}, '${escapeHtml(u.email)}')" title="Permanently delete account">
+            <i class="fa-solid fa-trash-can"></i>
+           </button>`;
+
       return `
         <tr>
           <td style="font-weight: 600; color: var(--text-muted);">#${u.id}</td>
@@ -239,7 +245,7 @@
           </td>
           <td>${roleBadge}</td>
           <td>${statusBadge}</td>
-          <td style="text-align: right;">${toggleBtn}</td>
+          <td style="text-align: right;"><div style="display:flex; gap:6px; justify-content:flex-end;">${toggleBtn}${deleteBtn}</div></td>
         </tr>
       `;
     }).join('');
@@ -263,6 +269,19 @@
       filterUsers();
     } catch (err) {
       CMS.showToast('Failed to update status: ' + err.message, 'error');
+    }
+  }
+
+  async function deleteUser(id, email) {
+    if (!confirm(`Are you sure you want to PERMANENTLY DELETE user "${email}" (#${id})? This action cannot be undone.`)) return;
+
+    try {
+      await CMS.fetchApi(`/api/users/${id}`, { method: 'DELETE' });
+      CMS.showToast(`User ${email} has been permanently deleted.`, 'success');
+      allUsers = allUsers.filter(u => u.id !== id);
+      filterUsers();
+    } catch (err) {
+      CMS.showToast('Failed to delete user: ' + err.message, 'error');
     }
   }
 

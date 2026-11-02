@@ -78,4 +78,15 @@ public class SalesOrderController {
     ) {
         return ResponseEntity.ok(salesOrderService.changeOrderStatus(id, request.getNewStatus(), userPrincipal.getUsername()));
     }
+
+    @DeleteMapping("/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
+    @Operation(summary = "Admin/Manager: Delete or cancel sales order")
+    public ResponseEntity<Void> deleteOrder(
+            @PathVariable Long id,
+            @AuthenticationPrincipal UserPrincipal userPrincipal
+    ) {
+        salesOrderService.deleteOrder(id, userPrincipal.getRole());
+        return ResponseEntity.noContent().build();
+    }
 }

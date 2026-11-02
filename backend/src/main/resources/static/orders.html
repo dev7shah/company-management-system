@@ -209,7 +209,7 @@ document.getElementById('statusForm').addEventListener('submit', async e => {
   const newStatus = document.getElementById('newStatusSelect').value;
   try {
     await CMS.fetchApi(`/api/orders/${id}/status`, { method:'PATCH', body: JSON.stringify({ newStatus }) });
-    CMS.showToast('Order status updated','success');
+    CMS.showToast(`Order status updated to ${newStatus}. Analytics warehouse updated!`, 'success');
     document.getElementById('statusModal').style.display='none'; loadOrders();
   } catch(e) { CMS.showToast(e.message,'error'); }
 });

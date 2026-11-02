@@ -94,6 +94,57 @@ public class AuthService {
                 .collect(Collectors.toList());
     }
 
+    public UserResponse getUserById(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + userId));
+        return new UserResponse(user.getId(), user.getEmail(), user.getRole(), user.isActive());
+    }
+
+    @Transactional
+    public UserResponse updateUser(Long userId, UpdateUserRequest request, String currentUsername) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + userId));
+
+        if (request.getEmail() != null && !request.getEmail().isBlank()) {
+            String newEmail = request.getEmail().trim().toLowerCase();
+            if (!user.getEmail().equalsIgnoreCase(newEmail) && userRepository.existsByEmail(newEmail)) {
+                throw new ConflictException("User with email " + newEmail + " already exists.");
+            }
+            user.setEmail(newEmail);
+        }
+
+        if (request.getRole() != null) {
+            if (user.getRole() == Role.ADMIN && request.getRole() != Role.ADMIN) {
+                long activeAdminCount = userRepository.findAll().stream()
+                        .filter(u -> u.getRole() == Role.ADMIN && u.isActive())
+                        .count();
+                if (activeAdminCount <= 1) {
+                    throw new BadRequestException("Cannot demote the last remaining Administrator account.");
+                }
+            }
+            user.setRole(request.getRole());
+        }
+
+        if (request.getActive() != null) {
+            if (!request.getActive() && user.getRole() == Role.ADMIN) {
+                long activeAdminCount = userRepository.findAll().stream()
+                        .filter(u -> u.getRole() == Role.ADMIN && u.isActive())
+                        .count();
+                if (activeAdminCount <= 1) {
+                    throw new BadRequestException("Cannot deactivate the last remaining active Administrator account.");
+                }
+            }
+            user.setActive(request.getActive());
+        }
+
+        if (request.getPassword() != null && !request.getPassword().isBlank()) {
+            user.setPassword(passwordEncoder.encode(request.getPassword()));
+        }
+
+        user = userRepository.save(user);
+        return new UserResponse(user.getId(), user.getEmail(), user.getRole(), user.isActive());
+    }
+
     @Transactional
     public UserResponse toggleUserActive(Long userId) {
         User user = userRepository.findById(userId)
@@ -131,6 +182,11 @@ public class AuthService {
                 throw new BadRequestException("Cannot delete the last remaining active Administrator account.");
             }
         }
+
+        employeeRepository.findByUserId(userId).ifPresent(emp -> {
+            emp.setUser(null);
+            employeeRepository.save(emp);
+        });
 
         userRepository.delete(user);
     }

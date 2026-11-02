@@ -67,4 +67,55 @@ public class FeedbackDtos {
         public LocalDateTime getCreatedAt() { return createdAt; }
         public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
     }
+
+    public static class PublicFeedbackOptions {
+        private java.util.List<CustomerOption> customers;
+        private java.util.List<ProductOption> products;
+
+        public PublicFeedbackOptions() {}
+
+        public PublicFeedbackOptions(java.util.List<CustomerOption> customers, java.util.List<ProductOption> products) {
+            this.customers = customers;
+            this.products = products;
+        }
+
+        public java.util.List<CustomerOption> getCustomers() { return customers; }
+        public void setCustomers(java.util.List<CustomerOption> customers) { this.customers = customers; }
+        public java.util.List<ProductOption> getProducts() { return products; }
+        public void setProducts(java.util.List<ProductOption> products) { this.products = products; }
+    }
+
+    public static class CustomerOption {
+        private Long id;
+        private String companyName;
+
+        public CustomerOption() {}
+
+        public CustomerOption(Long id, String companyName) {
+            this.id = id;
+            this.companyName = companyName;
+        }
+
+        public Long getId() { return id; }
+        public void setId(Long id) { this.id = id; }
+        public String getCompanyName() { return companyName; }
+        public void setCompanyName(String companyName) { this.companyName = companyName; }
+    }
+
+    public static class ProductOption {
+        private Long id;
+        private String name;
+
+        public ProductOption() {}
+
+        public ProductOption(Long id, String name) {
+            this.id = id;
+            this.name = name;
+        }
+
+        public Long getId() { return id; }
+        public void setId(Long id) { this.id = id; }
+        public String getName() { return name; }
+        public void setName(String name) { this.name = name; }
+    }
 }

@@ -18,6 +18,7 @@ public interface EmployeeRepository extends JpaRepository<Employee, Long> {
     boolean existsByEmail(String email);
     long countByDepartmentId(Long departmentId);
     List<Employee> findByDepartmentId(Long departmentId);
+    List<Employee> findByManagerId(Long managerId);
 
     @Query("SELECT e FROM Employee e WHERE " +
            "(:deptId IS NULL OR e.department.id = :deptId) AND " +

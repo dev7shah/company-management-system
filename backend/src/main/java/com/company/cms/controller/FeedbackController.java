@@ -1,7 +1,6 @@
 package com.company.cms.controller;
 
-import com.company.cms.dto.FeedbackDtos.FeedbackRequest;
-import com.company.cms.dto.FeedbackDtos.FeedbackResponse;
+import com.company.cms.dto.FeedbackDtos.*;
 import com.company.cms.service.FeedbackService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -24,6 +23,19 @@ public class FeedbackController {
         this.feedbackService = feedbackService;
     }
 
+    @GetMapping("/public/options")
+    @Operation(summary = "Public: Retrieve verified customer and product options for customer review intake")
+    public ResponseEntity<PublicFeedbackOptions> getPublicFeedbackOptions() {
+        return ResponseEntity.ok(feedbackService.getPublicFeedbackOptions());
+    }
+
+    @PostMapping("/public")
+    @Operation(summary = "Public: Customer submission of review, rating, and feedback")
+    public ResponseEntity<FeedbackResponse> submitPublicFeedback(@Valid @RequestBody FeedbackRequest request) {
+        FeedbackResponse response = feedbackService.createFeedback(request);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+
     @GetMapping
     @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
     @Operation(summary = "List customer feedback with optional filters by rating or product")
@@ -34,12 +46,29 @@ public class FeedbackController {
         return ResponseEntity.ok(feedbackService.getAllFeedback(rating, productId));
     }
 
+    @GetMapping("/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
+    @Operation(summary = "Get customer feedback details by ID")
+    public ResponseEntity<FeedbackResponse> getFeedbackById(@PathVariable Long id) {
+        return ResponseEntity.ok(feedbackService.getFeedbackById(id));
+    }
+
     @PostMapping
     @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
     @Operation(summary = "Submit new customer feedback")
     public ResponseEntity<FeedbackResponse> createFeedback(@Valid @RequestBody FeedbackRequest request) {
         FeedbackResponse response = feedbackService.createFeedback(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+
+    @PutMapping("/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
+    @Operation(summary = "Update customer feedback review or rating")
+    public ResponseEntity<FeedbackResponse> updateFeedback(
+            @PathVariable Long id,
+            @Valid @RequestBody FeedbackRequest request
+    ) {
+        return ResponseEntity.ok(feedbackService.updateFeedback(id, request));
     }
 
     @DeleteMapping("/{id}")

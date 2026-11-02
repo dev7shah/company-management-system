@@ -4,7 +4,9 @@ import com.company.cms.dto.ProductDtos.*;
 import com.company.cms.entity.Product;
 import com.company.cms.exception.ConflictException;
 import com.company.cms.exception.ResourceNotFoundException;
+import com.company.cms.repository.CustomerFeedbackRepository;
 import com.company.cms.repository.ProductRepository;
+import com.company.cms.repository.SalesOrderRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -15,9 +17,17 @@ import java.util.stream.Collectors;
 public class ProductService {
 
     private final ProductRepository productRepository;
+    private final SalesOrderRepository salesOrderRepository;
+    private final CustomerFeedbackRepository customerFeedbackRepository;
 
-    public ProductService(ProductRepository productRepository) {
+    public ProductService(
+            ProductRepository productRepository,
+            SalesOrderRepository salesOrderRepository,
+            CustomerFeedbackRepository customerFeedbackRepository
+    ) {
         this.productRepository = productRepository;
+        this.salesOrderRepository = salesOrderRepository;
+        this.customerFeedbackRepository = customerFeedbackRepository;
     }
 
     public List<ProductResponse> getAllProducts(String category, Boolean activeOnly) {
@@ -79,13 +89,19 @@ public class ProductService {
     public void deleteProduct(Long id) {
         Product p = productRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Product not found with id: " + id));
-        try {
-            productRepository.delete(p);
-            productRepository.flush();
-        } catch (org.springframework.dao.DataIntegrityViolationException ex) {
-            // Soft-deactivate to preserve historical order items & analytics
+
+        long orderUsage = salesOrderRepository.countOrderItemsByProductId(id);
+        if (orderUsage > 0) {
+            // Soft-deactivate to preserve historical order items & revenue audit trails
             p.setActive(false);
             productRepository.save(p);
+        } else {
+            // Unlink any product references from customer feedback reviews first
+            customerFeedbackRepository.findByProductId(id).forEach(fb -> {
+                fb.setProduct(null);
+                customerFeedbackRepository.save(fb);
+            });
+            productRepository.delete(p);
         }
     }
 

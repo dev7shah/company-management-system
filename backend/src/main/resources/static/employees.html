@@ -173,6 +173,27 @@
             <input type="date" id="dateOfBirth" class="form-control" style="width:100%;">
           </div>
         </div>
+
+        <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:12px; margin-top:14px;">
+          <div style="font-size:12px; font-weight:700; color:var(--text-main); margin-bottom:8px;">
+            <i class="fa-solid fa-shield-halved" style="color:var(--primary); margin-right:4px;"></i> System Login Provisioning (Auto-Guaranteed)
+          </div>
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px;">
+            <div>
+              <label class="form-label">System Access Role</label>
+              <select id="userRole" class="form-select" style="width:100%;">
+                <option value="EMPLOYEE">EMPLOYEE (Standard Staff)</option>
+                <option value="MANAGER">MANAGER (Department Approvals)</option>
+                <option value="ADMIN">ADMIN (Full Governance)</option>
+              </select>
+            </div>
+            <div>
+              <label class="form-label">Initial Password</label>
+              <input type="text" id="loginPassword" class="form-control" placeholder="Default: Employee@123" style="width:100%;">
+            </div>
+          </div>
+          <div style="font-size:11px; color:var(--text-muted); margin-top:6px;">Every employee is guaranteed an active system login linked to their corporate email.</div>
+        </div>
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-outline" onclick="closeModal()">Cancel</button>
@@ -235,6 +256,7 @@
           <td>
             <div style="font-weight:600;">${emp.firstName} ${emp.lastName}</div>
             <div style="font-size:12px; color:var(--text-muted);">${emp.email}</div>
+            <div style="margin-top:4px;"><span class="badge badge-positive" style="font-size:10px; padding:2px 7px;"><i class="fa-solid fa-key" style="margin-right:3px;"></i>${emp.userRole || 'EMPLOYEE'} Login</span></div>
           </td>
           <td>${emp.jobTitle}</td>
           <td><span class="badge badge-inquiry">${emp.departmentName || 'General'}</span></td>
@@ -260,6 +282,8 @@
     document.getElementById('empId').value = '';
     document.getElementById('employeeForm').reset();
     document.getElementById('hireDate').value = new Date().toISOString().split('T')[0];
+    document.getElementById('userRole').value = 'EMPLOYEE';
+    document.getElementById('loginPassword').value = '';
     document.getElementById('employeeModal').style.display = 'flex';
   }
 
@@ -276,6 +300,8 @@
     document.getElementById('hireDate').value = emp.hireDate || '';
     document.getElementById('dateOfBirth').value = emp.dateOfBirth || '';
     document.getElementById('departmentId').value = emp.departmentId || '';
+    document.getElementById('userRole').value = emp.userRole || 'EMPLOYEE';
+    document.getElementById('loginPassword').value = '';
     document.getElementById('employeeModal').style.display = 'flex';
   }
 
@@ -296,7 +322,9 @@
       salary: parseFloat(document.getElementById('salary').value),
       hireDate: document.getElementById('hireDate').value,
       dateOfBirth: document.getElementById('dateOfBirth').value || null,
-      departmentId: parseInt(document.getElementById('departmentId').value)
+      departmentId: parseInt(document.getElementById('departmentId').value),
+      role: document.getElementById('userRole').value,
+      password: document.getElementById('loginPassword').value.trim() || null
     };
 
     try {

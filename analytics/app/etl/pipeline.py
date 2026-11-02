@@ -68,9 +68,11 @@ def run_etl_pipeline():
             })
             
             # Dim Customer
+            df_sales["region"] = df_sales["region"].astype(str).str.upper()
             df_dim_customer = df_sales[["customer_id", "customer_name", "region"]].drop_duplicates(subset=["customer_id"]).rename(
                 columns={"customer_name": "company_name"}
             )
+            df_dim_customer["region"] = df_dim_customer["region"].astype(str).str.upper()
             df_dim_customer["customer_key"] = range(1, len(df_dim_customer) + 1)
             
             # Dim Employee
@@ -131,11 +133,14 @@ def run_etl_pipeline():
             # TextBlob sentiment scoring
             from textblob import TextBlob
             polarities = []
+            subjectivities = []
             labels = []
             for text_val in df_reviews["review_text"].fillna(""):
                 blob = TextBlob(str(text_val))
                 pol = blob.sentiment.polarity
+                sub = blob.sentiment.subjectivity
                 polarities.append(round(pol, 4))
+                subjectivities.append(round(sub, 4))
                 if pol > 0.1:
                     labels.append("POSITIVE")
                 elif pol < -0.1:
@@ -143,6 +148,7 @@ def run_etl_pipeline():
                 else:
                     labels.append("NEUTRAL")
             df_reviews["sentiment_score"] = polarities
+            df_reviews["subjectivity_score"] = subjectivities
             df_reviews["sentiment_label"] = labels
             
             # Map foreign keys if dimensions exist
@@ -162,7 +168,7 @@ def run_etl_pipeline():
             
             fact_feedback = df_reviews[[
                 "feedback_key", "feedback_id", "customer_key", "product_key", "date_key",
-                "rating", "review_text", "sentiment_label", "sentiment_score", "source"
+                "rating", "review_text", "sentiment_label", "sentiment_score", "subjectivity_score", "source"
             ]]
             rows_loaded_feedback = len(fact_feedback)
         else:
@@ -187,7 +193,23 @@ def run_etl_pipeline():
                 fact_sales.to_sql(f"{schema_prefix}fact_sales_order".replace("dw.", ""), con=engine, if_exists="replace", index=False)
             if not fact_feedback.empty:
                 fact_feedback.to_sql(f"{schema_prefix}fact_feedback".replace("dw.", ""), con=engine, if_exists="replace", index=False)
-                
+
+        # 4b. Extract and sync live operational orders from Spring Boot into Data Warehouse
+        try:
+            import urllib.request
+            import json
+            req = urllib.request.Request("http://127.0.0.1:8080/api/analytics/internal/orders")
+            with urllib.request.urlopen(req, timeout=3) as resp:
+                if resp.status == 200:
+                    op_orders = json.loads(resp.read().decode())
+                    if op_orders:
+                        rows_extracted_operational = len(op_orders)
+                        from .live_sync import sync_all_operational_orders
+                        sync_all_operational_orders(op_orders)
+        except Exception:
+            pass
+
+        with engine.begin() as conn:
             # Log ETL Run
             log_table = f"{schema_prefix}etl_runs_log".replace("dw.", "")
             end_time = datetime.now()

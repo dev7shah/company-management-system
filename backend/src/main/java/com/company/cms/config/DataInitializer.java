@@ -2,6 +2,7 @@ package com.company.cms.config;
 
 import com.company.cms.entity.*;
 import com.company.cms.repository.*;
+import com.company.cms.service.AnalyticsClientService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.CommandLineRunner;
@@ -28,6 +29,7 @@ public class DataInitializer implements CommandLineRunner {
     private final CustomerFeedbackRepository feedbackRepository;
     private final ProjectRepository projectRepository;
     private final PasswordEncoder passwordEncoder;
+    private final AnalyticsClientService analyticsClientService;
 
     public DataInitializer(
             UserRepository userRepository,
@@ -38,7 +40,8 @@ public class DataInitializer implements CommandLineRunner {
             SalesOrderRepository salesOrderRepository,
             CustomerFeedbackRepository feedbackRepository,
             ProjectRepository projectRepository,
-            PasswordEncoder passwordEncoder
+            PasswordEncoder passwordEncoder,
+            AnalyticsClientService analyticsClientService
     ) {
         this.userRepository = userRepository;
         this.departmentRepository = departmentRepository;
@@ -49,13 +52,16 @@ public class DataInitializer implements CommandLineRunner {
         this.feedbackRepository = feedbackRepository;
         this.projectRepository = projectRepository;
         this.passwordEncoder = passwordEncoder;
+        this.analyticsClientService = analyticsClientService;
     }
 
     @Override
     @Transactional
     public void run(String... args) {
         if (userRepository.count() > 0) {
-            log.info("Database already contains users. Skipping initial demo seed.");
+            log.info("Database already contains users. Checking employee login parity and syncing warehouse...");
+            ensureAllEmployeesHaveUserLogins();
+            syncAllOrdersToAnalyticsWarehouse();
             return;
         }
 
@@ -117,6 +123,8 @@ public class DataInitializer implements CommandLineRunner {
         empSales.setUser(employeeUser);
         empSales = employeeRepository.save(empSales);
 
+        User architectUser = userRepository.save(new User("diana.prince@company.com", passwordEncoder.encode("Employee@123"), Role.EMPLOYEE));
+
         Employee empArchitect = new Employee();
         empArchitect.setEmployeeCode("EMP-1004");
         empArchitect.setFirstName("Diana");
@@ -129,7 +137,19 @@ public class DataInitializer implements CommandLineRunner {
         empArchitect.setSalary(new BigDecimal("160000.00"));
         empArchitect.setDepartment(deptEng);
         empArchitect.setManager(empAdmin);
+        empArchitect.setUser(architectUser);
         empArchitect = employeeRepository.save(empArchitect);
+
+        // Guarantee that EVERY employee in the repository ALWAYS has a linked system user login
+        for (Employee e : employeeRepository.findAll()) {
+            if (e.getUser() == null) {
+                User u = userRepository.findByEmail(e.getEmail()).orElseGet(() ->
+                        userRepository.save(new User(e.getEmail(), passwordEncoder.encode("Employee@123"), Role.EMPLOYEE))
+                );
+                e.setUser(u);
+                employeeRepository.save(e);
+            }
+        }
 
         // 4. Seed Products
         Product pErp = new Product();
@@ -260,6 +280,17 @@ public class DataInitializer implements CommandLineRunner {
         createFeedback(c5, pHrm, 5, "Excellent HR automated payroll workflows and great response time from tech support.", "POSITIVE", 0.85);
 
         log.info("Corporate seed data initialization completed successfully.");
+        syncAllOrdersToAnalyticsWarehouse();
+    }
+
+    private void syncAllOrdersToAnalyticsWarehouse() {
+        try {
+            var orders = salesOrderRepository.findAll();
+            analyticsClientService.syncAllOrdersToAnalytics(orders);
+            log.info("Synchronized {} operational sales orders to Analytics Data Warehouse.", orders.size());
+        } catch (Exception e) {
+            log.warn("Initial sync of sales orders to analytics failed: {}", e.getMessage());
+        }
     }
 
     private void createOrder(Customer customer, Employee salesRep, String region, OrderStatus status, List<ItemSpec> itemSpecs, BigDecimal discountPct) {
@@ -314,6 +345,19 @@ public class DataInitializer implements CommandLineRunner {
         fb.setSentimentLabel(sentiment);
         fb.setSentimentScore(score);
         feedbackRepository.save(fb);
+    }
+
+    private void ensureAllEmployeesHaveUserLogins() {
+        for (Employee e : employeeRepository.findAll()) {
+            if (e.getUser() == null) {
+                User u = userRepository.findByEmail(e.getEmail()).orElseGet(() ->
+                        userRepository.save(new User(e.getEmail(), passwordEncoder.encode("Employee@123"), Role.EMPLOYEE))
+                );
+                e.setUser(u);
+                employeeRepository.save(e);
+                log.info("Auto-provisioned system login for employee: {}", e.getEmail());
+            }
+        }
     }
 
     private record ItemSpec(Product product, int qty) {}

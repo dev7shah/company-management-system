@@ -1,12 +1,15 @@
 package com.company.cms.controller;
 
+import com.company.cms.dto.SalesOrderDtos.SalesOrderResponse;
 import com.company.cms.entity.Employee;
+import com.company.cms.entity.Role;
 import com.company.cms.entity.SalesOrder;
 import com.company.cms.repository.EmployeeRepository;
 import com.company.cms.repository.ProjectRepository;
 import com.company.cms.repository.SalesOrderRepository;
 import com.company.cms.security.UserPrincipal;
 import com.company.cms.service.AnalyticsClientService;
+import com.company.cms.service.SalesOrderService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
@@ -28,17 +31,26 @@ public class AnalyticsController {
     private final EmployeeRepository employeeRepository;
     private final SalesOrderRepository salesOrderRepository;
     private final ProjectRepository projectRepository;
+    private final SalesOrderService salesOrderService;
 
     public AnalyticsController(
             AnalyticsClientService analyticsClientService,
             EmployeeRepository employeeRepository,
             SalesOrderRepository salesOrderRepository,
-            ProjectRepository projectRepository
+            ProjectRepository projectRepository,
+            SalesOrderService salesOrderService
     ) {
         this.analyticsClientService = analyticsClientService;
         this.employeeRepository = employeeRepository;
         this.salesOrderRepository = salesOrderRepository;
         this.projectRepository = projectRepository;
+        this.salesOrderService = salesOrderService;
+    }
+
+    @GetMapping("/internal/orders")
+    @Operation(summary = "Internal: Extract all operational sales orders for ETL warehouse synchronization")
+    public ResponseEntity<List<SalesOrderResponse>> getInternalOrders() {
+        return ResponseEntity.ok(salesOrderService.getOrders(Role.ADMIN, null, null, null));
     }
 
     @PostMapping("/etl/run")
