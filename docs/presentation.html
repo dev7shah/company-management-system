@@ -1,0 +1,2730 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Company Management System — Architecture &amp; Project Specification</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<style>
+:root {
+  --bg-canvas: #f8fafc;
+  --bg-surface: #ffffff;
+  --bg-subtle: #f1f5f9;
+  --border: #e2e8f0;
+  --border-subtle: #edf2f7;
+  
+  --text-main: #0f172a;
+  --text-body: #334155;
+  --text-muted: #64748b;
+  --text-light: #94a3b8;
+  
+  --ink: #0f172a;
+  
+  /* Restrained, solid indicator colors - ZERO gradients */
+  --c-blue: #2563eb;
+  --c-blue-bg: #eff6ff;
+  --c-green: #059669;
+  --c-green-bg: #ecfdf5;
+  --c-amber: #d97706;
+  --c-amber-bg: #fffbeb;
+  --c-purple: #7c3aed;
+  --c-purple-bg: #f5f3ff;
+  --c-red: #dc2626;
+  --c-red-bg: #fef2f2;
+
+  --font-display: 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-body: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.04), 0 1px 2px -1px rgba(0, 0, 0, 0.02);
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  scroll-behavior: smooth;
+  font-size: 15px;
+}
+
+body {
+  font-family: var(--font-body);
+  background-color: var(--bg-canvas);
+  color: var(--text-body);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  min-height: 100vh;
+}
+
+/* Typography Standards */
+h1, h2, h3, h4, h5, .font-display {
+  font-family: var(--font-display);
+  color: var(--text-main);
+  letter-spacing: -0.02em;
+  font-weight: 600;
+}
+
+h1 { font-size: 2.25rem; line-height: 1.2; font-weight: 700; }
+h2 { font-size: 1.45rem; line-height: 1.3; }
+h3 { font-size: 1.1rem; line-height: 1.4; }
+h4 { font-size: 0.95rem; }
+
+p { margin-bottom: 0.85rem; }
+p:last-child { margin-bottom: 0; }
+
+code {
+  font-family: var(--font-mono);
+  font-size: 0.85em;
+  background-color: var(--bg-subtle);
+  color: var(--text-main);
+  padding: 0.15em 0.45em;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-subtle);
+}
+
+/* Header & Navigation Bar */
+.navbar {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: var(--bg-surface);
+  border-bottom: 1px solid var(--border);
+  box-shadow: var(--shadow-sm);
+}
+
+.navbar-inner {
+  max-width: 1140px;
+  margin: 0 auto;
+  padding: 0 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 56px;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+  color: var(--text-main);
+}
+
+.brand-badge {
+  background: var(--ink);
+  color: #ffffff;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 0.85rem;
+  padding: 4px 8px;
+  border-radius: var(--radius-sm);
+  letter-spacing: 0.05em;
+}
+
+.brand-title {
+  font-family: var(--font-display);
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--text-main);
+}
+
+.nav-tabs {
+  display: flex;
+  gap: 4px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.nav-tabs::-webkit-scrollbar { display: none; }
+
+.nav-tab {
+  font-family: var(--font-body);
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: var(--text-muted);
+  background: none;
+  border: none;
+  padding: 6px 12px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.15s ease;
+}
+
+.nav-tab:hover {
+  color: var(--text-main);
+  background: var(--bg-subtle);
+}
+
+.nav-tab.active {
+  color: #ffffff;
+  background: var(--ink);
+  font-weight: 600;
+}
+
+.nav-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-body);
+  font-size: 0.82rem;
+  font-weight: 500;
+  padding: 6px 12px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  background: var(--bg-surface);
+  color: var(--text-body);
+  cursor: pointer;
+  text-decoration: none;
+  transition: all 0.15s ease;
+}
+
+.btn:hover {
+  background: var(--bg-subtle);
+  color: var(--text-main);
+  border-color: var(--text-light);
+}
+
+.btn-primary {
+  background: var(--ink);
+  color: #ffffff;
+  border-color: var(--ink);
+}
+
+.btn-primary:hover {
+  background: #1e293b;
+  color: #ffffff;
+  border-color: #1e293b;
+}
+
+/* Page Container */
+.page-container {
+  max-width: 1140px;
+  margin: 0 auto;
+  padding: 40px 24px 80px;
+}
+
+.section {
+  display: none;
+}
+.section.active {
+  display: block;
+}
+
+/* Clean Header / Hero */
+.hero {
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 32px;
+  margin-bottom: 36px;
+}
+
+.eyebrow {
+  display: inline-block;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-muted);
+  margin-bottom: 8px;
+}
+
+.hero-subtitle {
+  font-size: 1.05rem;
+  color: var(--text-muted);
+  max-width: 760px;
+  margin-top: 8px;
+}
+
+.quick-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 24px;
+}
+
+.filter-search {
+  position: relative;
+  width: 100%;
+  max-width: 320px;
+}
+
+.filter-search input {
+  width: 100%;
+  padding: 8px 12px 8px 32px;
+  font-family: var(--font-body);
+  font-size: 0.85rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--bg-surface);
+  color: var(--text-main);
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+.filter-search input:focus {
+  border-color: var(--ink);
+}
+
+.filter-search svg {
+  position: absolute;
+  left: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-light);
+}
+
+/* Metric / Stat Strip */
+.stats-strip {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 12px;
+  margin-bottom: 36px;
+}
+
+.stat-box {
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 16px;
+  box-shadow: var(--shadow-sm);
+}
+
+.stat-val {
+  font-family: var(--font-display);
+  font-size: 1.85rem;
+  font-weight: 700;
+  color: var(--text-main);
+  line-height: 1.1;
+  margin-bottom: 4px;
+}
+
+.stat-desc {
+  font-size: 0.76rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* Content Grids */
+.grid-2 {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(420px, 1fr));
+  gap: 20px;
+  margin-bottom: 32px;
+}
+
+.grid-3 {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(310px, 1fr));
+  gap: 18px;
+  margin-bottom: 32px;
+}
+
+.grid-4 {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  gap: 16px;
+  margin-bottom: 32px;
+}
+
+/* Card Component */
+.card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 22px;
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  flex-direction: column;
+}
+
+.card-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.card-title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-main);
+}
+
+.card-meta {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+
+.card-body {
+  font-size: 0.88rem;
+  color: var(--text-body);
+  flex-grow: 1;
+}
+
+/* Badges & Pills - Pure, flat, subtle solid fills */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 500;
+  padding: 2px 7px;
+  border-radius: var(--radius-sm);
+  white-space: nowrap;
+}
+
+.badge-neutral { background: var(--bg-subtle); color: var(--text-body); border: 1px solid var(--border); }
+.badge-blue    { background: var(--c-blue-bg); color: var(--c-blue); border: 1px solid #bfdbfe; }
+.badge-green   { background: var(--c-green-bg); color: var(--c-green); border: 1px solid #a7f3d0; }
+.badge-amber   { background: var(--c-amber-bg); color: var(--c-amber); border: 1px solid #fde68a; }
+.badge-purple  { background: var(--c-purple-bg); color: var(--c-purple); border: 1px solid #ddd6fe; }
+.badge-red     { background: var(--c-red-bg); color: var(--c-red); border: 1px solid #fecaca; }
+
+.pill-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 10px;
+}
+
+/* Section Header */
+.section-header {
+  margin-bottom: 24px;
+}
+
+.section-header h2 {
+  font-size: 1.35rem;
+  font-weight: 600;
+  color: var(--text-main);
+}
+
+.section-header p {
+  font-size: 0.88rem;
+  color: var(--text-muted);
+  margin-top: 3px;
+}
+
+/* Clean Explanatory Callout */
+.callout {
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-left: 4px solid var(--ink);
+  border-radius: var(--radius-sm);
+  padding: 16px 20px;
+  margin-bottom: 24px;
+}
+
+.callout-title {
+  font-family: var(--font-display);
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--text-main);
+  margin-bottom: 4px;
+}
+
+.callout-text {
+  font-size: 0.88rem;
+  color: var(--text-body);
+  line-height: 1.55;
+}
+
+/* Tables */
+.table-wrapper {
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  overflow-x: auto;
+  box-shadow: var(--shadow-sm);
+  margin-bottom: 28px;
+}
+
+table.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+  text-align: left;
+}
+
+table.data-table th {
+  background: var(--bg-subtle);
+  padding: 10px 14px;
+  font-family: var(--font-display);
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-muted);
+  border-bottom: 1px solid var(--border);
+}
+
+table.data-table td {
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--border-subtle);
+  vertical-align: middle;
+}
+
+table.data-table tr:last-child td {
+  border-bottom: none;
+}
+
+table.data-table tr:hover td {
+  background: #fafafc;
+}
+
+/* Interactive Feature Detail Item */
+.feature-item {
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  margin-bottom: 12px;
+  transition: border-color 0.15s;
+}
+
+.feature-item:hover {
+  border-color: var(--text-light);
+}
+
+.feature-summary {
+  padding: 16px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  user-select: none;
+}
+
+.feature-summary-left {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.feature-num {
+  font-family: var(--font-mono);
+  font-size: 0.76rem;
+  font-weight: 600;
+  background: var(--bg-subtle);
+  color: var(--text-main);
+  padding: 3px 8px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+}
+
+.feature-title-text {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--text-main);
+}
+
+.feature-subtitle-text {
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  margin-top: 1px;
+}
+
+.feature-summary-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.feature-chevron {
+  width: 18px;
+  height: 18px;
+  color: var(--text-light);
+  transition: transform 0.2s ease;
+}
+
+.feature-item.open .feature-chevron {
+  transform: rotate(180deg);
+  color: var(--text-main);
+}
+
+.feature-details {
+  display: none;
+  padding: 0 20px 20px 20px;
+  border-top: 1px solid var(--border-subtle);
+  background: #fafafa;
+}
+
+.feature-item.open .feature-details {
+  display: block;
+}
+
+.feature-details-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 16px;
+  margin-top: 16px;
+}
+
+.feature-details-col h5 {
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-muted);
+  margin-bottom: 8px;
+}
+
+.clean-list {
+  list-style: none;
+}
+
+.clean-list li {
+  font-size: 0.85rem;
+  color: var(--text-body);
+  margin-bottom: 6px;
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.clean-list li::before {
+  content: "•";
+  color: var(--text-light);
+  font-size: 1.1em;
+  line-height: 1.2;
+}
+
+/* Architecture & Flow Diagrams */
+.diagram-container {
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 24px;
+  margin-bottom: 24px;
+  box-shadow: var(--shadow-sm);
+}
+
+.diagram-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border-subtle);
+}
+
+.diagram-info-panel {
+  background: var(--bg-subtle);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 12px 16px;
+  font-size: 0.85rem;
+  color: var(--text-main);
+  margin-top: 14px;
+  min-height: 48px;
+  display: flex;
+  align-items: center;
+}
+
+/* Sequential Step Strip */
+.step-strip {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding-bottom: 6px;
+  margin: 18px 0;
+}
+
+.step-card {
+  flex: 1;
+  min-width: 120px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 12px;
+  font-size: 0.8rem;
+  text-align: center;
+  position: relative;
+}
+
+.step-card-num {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--text-light);
+  margin-bottom: 4px;
+}
+
+.step-card-title {
+  font-weight: 600;
+  color: var(--text-main);
+  line-height: 1.2;
+}
+
+/* Code Snippets - Dark clean slate block */
+.code-container {
+  background: #0f172a;
+  color: #e2e8f0;
+  border-radius: var(--radius-md);
+  padding: 16px 20px;
+  font-family: var(--font-mono);
+  font-size: 0.82rem;
+  line-height: 1.6;
+  overflow-x: auto;
+  margin-bottom: 20px;
+}
+
+.code-title {
+  color: #94a3b8;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: 8px;
+  border-bottom: 1px solid #1e293b;
+  padding-bottom: 6px;
+}
+
+.code-container .kw  { color: #93c5fd; font-weight: 500; }
+.code-container .fn  { color: #a7f3d0; }
+.code-container .str { color: #fde68a; }
+.code-container .num { color: #fca5a5; }
+.code-container .com { color: #64748b; font-style: italic; }
+
+/* Progress bars - solid, crisp */
+.progress-row {
+  margin-bottom: 14px;
+}
+.progress-labels {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.82rem;
+  font-weight: 500;
+  margin-bottom: 6px;
+}
+.progress-track {
+  height: 6px;
+  background: var(--bg-subtle);
+  border-radius: 3px;
+  overflow: hidden;
+  border: 1px solid var(--border-subtle);
+}
+.progress-fill {
+  height: 100%;
+  background: var(--ink);
+  border-radius: 3px;
+}
+
+/* Slide-out Cheat Sheet Drawer */
+.drawer-backdrop {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.4);
+  z-index: 200;
+}
+.drawer-backdrop.active { display: block; }
+
+.drawer {
+  position: fixed;
+  top: 0;
+  right: -460px;
+  width: 440px;
+  max-width: 90vw;
+  height: 100vh;
+  background: var(--bg-surface);
+  box-shadow: -8px 0 24px rgba(0, 0, 0, 0.08);
+  border-left: 1px solid var(--border);
+  z-index: 201;
+  transition: right 0.25s ease;
+  display: flex;
+  flex-direction: column;
+}
+.drawer.active { right: 0; }
+
+.drawer-header {
+  padding: 18px 24px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.drawer-content {
+  padding: 24px;
+  overflow-y: auto;
+  flex-grow: 1;
+}
+
+/* Print Optimization */
+@media print {
+  .navbar, .quick-bar, .diagram-controls, .btn, .filter-search { display: none !important; }
+  .section { display: block !important; page-break-after: always; }
+  body { background: #ffffff; color: #000000; font-size: 12pt; }
+  .card, .table-wrapper, .feature-item { box-shadow: none !important; border: 1px solid #ccc !important; }
+  .feature-details { display: block !important; }
+}
+
+@media (max-width: 768px) {
+  .navbar-inner { padding: 0 16px; height: auto; flex-wrap: wrap; padding-top: 10px; padding-bottom: 10px; gap: 10px; }
+  .page-container { padding: 24px 16px 60px; }
+  .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; }
+  h1 { font-size: 1.85rem; }
+}
+</style>
+</head>
+<body>
+
+<!-- Navigation Bar -->
+<header class="navbar">
+  <div class="navbar-inner">
+    <a href="#" class="brand" onclick="showTab('overview'); return false;">
+      <span class="brand-badge">CMS</span>
+      <span class="brand-title">Company Management System</span>
+    </a>
+    <nav class="nav-tabs">
+      <button class="nav-tab active" onclick="showTab('overview', this)">Overview</button>
+      <button class="nav-tab" onclick="showTab('architecture', this)">Architecture</button>
+      <button class="nav-tab" onclick="showTab('features', this)">Working Features</button>
+      <button class="nav-tab" onclick="showTab('prd', this)">PRD Blueprint</button>
+      <button class="nav-tab" onclick="showTab('trd', this)">TRD Specification</button>
+      <button class="nav-tab" onclick="showTab('database', this)">Database &amp; DW</button>
+      <button class="nav-tab" onclick="showTab('testing', this)">Testing &amp; QA</button>
+      <button class="nav-tab" onclick="showTab('devops', this)">DevOps &amp; Deploy</button>
+    </nav>
+    <div class="nav-actions">
+      <button class="btn" onclick="toggleCheatSheet()" title="Quick cheat-sheet for oral questions">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+        Viva Notes
+      </button>
+      <button class="btn btn-primary" onclick="window.print()" title="Print clean executive summary">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+        Print
+      </button>
+    </div>
+  </div>
+</header>
+
+<main class="page-container">
+
+  <!-- ════════════════════ 1. OVERVIEW ════════════════════ -->
+  <section id="tab-overview" class="section active">
+    <div class="hero">
+      <div class="eyebrow">Project Presentation &amp; Technical Defense</div>
+      <h1>Company Management System</h1>
+      <p class="hero-subtitle">
+        An enterprise full-stack platform integrating operational Spring Boot REST CRUD, a Python FastAPI predictive analytics microservice, and a dual-schema PostgreSQL Data Warehouse with automated ETL.
+      </p>
+      
+      <div class="quick-bar">
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <button class="btn btn-primary" onclick="showTab('features')">Explore Features</button>
+          <button class="btn" onclick="showTab('architecture')">System Architecture</button>
+          <button class="btn" onclick="showTab('prd')">Review PRD</button>
+          <button class="btn" onclick="showTab('trd')">Review TRD</button>
+        </div>
+        <div class="badge badge-neutral">Status: Production Ready · JDK 21 · Python 3.11</div>
+      </div>
+    </div>
+
+    <!-- Core Numerical Metrics Strip -->
+    <div class="stats-strip">
+      <div class="stat-box">
+        <div class="stat-val">8</div>
+        <div class="stat-desc">CRUD Modules</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-val">12</div>
+        <div class="stat-desc">REST Controllers</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-val">40+</div>
+        <div class="stat-desc">REST Endpoints</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-val">3</div>
+        <div class="stat-desc">ML Models</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-val">2</div>
+        <div class="stat-desc">DB Schemas</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-val">12</div>
+        <div class="stat-desc">Dashboards</div>
+      </div>
+    </div>
+
+    <!-- Problem & Solution Comparison -->
+    <div class="section-header">
+      <h2>Problem &amp; Value Proposition</h2>
+      <p>Why this system replaces legacy spreadsheets and departmental silos</p>
+    </div>
+
+    <div class="grid-2">
+      <div class="card" style="border-left: 3px solid var(--c-red);">
+        <div class="card-header">
+          <div>
+            <div class="card-title">The Problem — Fragmented Spreadsheets</div>
+            <div class="card-meta">Legacy operational failure points</div>
+          </div>
+          <span class="badge badge-red">Before</span>
+        </div>
+        <div class="card-body">
+          <ul class="clean-list">
+            <li><strong>Data Redundancy &amp; Conflicts:</strong> Employee, customer, and sales records lived across disconnected Excel spreadsheets with no single source of truth.</li>
+            <li><strong>Severe Security Gaps:</strong> Zero field-level access control; staff members could openly view executive salaries, PII, and financial margins.</li>
+            <li><strong>Manual Order Entry Errors:</strong> Unenforced pricing rules and manual discount calculations led to severe billing discrepancies.</li>
+            <li><strong>Absence of Intelligence:</strong> Management made inventory and revenue forecasts based purely on instinct without historical modeling.</li>
+            <li><strong>Unmonitored Customer Sentiment:</strong> Customer feedback was archived in email inboxes and never connected to product development.</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="card" style="border-left: 3px solid var(--c-green);">
+        <div class="card-header">
+          <div>
+            <div class="card-title">The Solution — Integrated CMS Platform</div>
+            <div class="card-meta">Architectural resolution</div>
+          </div>
+          <span class="badge badge-green">After</span>
+        </div>
+        <div class="card-body">
+          <ul class="clean-list">
+            <li><strong>Single System of Record:</strong> Relational PostgreSQL schema with foreign-key referential integrity, unique constraints, and ACID transactions.</li>
+            <li><strong>Role-Based Access Control:</strong> Strict hierarchy (Admin &gt; Manager &gt; Employee) enforced with stateless JWT cookies and service-level annotations.</li>
+            <li><strong>Automated Order Calculations:</strong> Forward-only order state machine with server-side pricing, tax, and discount validation (0–30%).</li>
+            <li><strong>Predictive Analytics Engine:</strong> Dedicated Python microservice running Holt-Winters time-series forecasting and K-Means segmentation.</li>
+            <li><strong>Automated NLP Analysis:</strong> TextBlob natural language processing classifying review polarity and extracting aspect sentiment scores.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- 3-Component Architecture Breakdown -->
+    <div class="section-header">
+      <h2>3-Tier System Composition</h2>
+      <p>Clean division of responsibilities across the technology stack</p>
+    </div>
+
+    <div class="grid-3">
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <div class="card-title">1. Operational Core</div>
+            <div class="card-meta">Spring Boot REST API</div>
+          </div>
+          <span class="badge badge-neutral">Java 21</span>
+        </div>
+        <div class="card-body">
+          <p>Layered modular architecture with Spring Security 6, Spring Data JPA, Hibernate, Bean Validation, and Swagger/OpenAPI documentation.</p>
+          <div class="pill-list">
+            <span class="badge badge-neutral">Spring Boot 3.3</span>
+            <span class="badge badge-neutral">JWT HS256</span>
+            <span class="badge badge-neutral">BCrypt-12</span>
+            <span class="badge badge-neutral">Bucket4j</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <div class="card-title">2. Analytics Microservice</div>
+            <div class="card-meta">FastAPI &amp; Data Science</div>
+          </div>
+          <span class="badge badge-neutral">Python 3.11</span>
+        </div>
+        <div class="card-body">
+          <p>High-performance analytics engine providing automated ETL, ML model execution, statistical aggregations, and Plotly figure JSON generation.</p>
+          <div class="pill-list">
+            <span class="badge badge-neutral">FastAPI</span>
+            <span class="badge badge-neutral">Pandas</span>
+            <span class="badge badge-neutral">Scikit-Learn</span>
+            <span class="badge badge-neutral">Plotly</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <div class="card-title">3. Dual-Schema Storage</div>
+            <div class="card-meta">PostgreSQL 16 Engine</div>
+          </div>
+          <span class="badge badge-neutral">PostgreSQL</span>
+        </div>
+        <div class="card-body">
+          <p>Physical isolation of operational OLTP data (<code>public</code> schema) and analytics OLAP data (<code>dw</code> star schema) with dedicated least-privilege users.</p>
+          <div class="pill-list">
+            <span class="badge badge-neutral">public (OLTP)</span>
+            <span class="badge badge-neutral">dw (OLAP)</span>
+            <span class="badge badge-neutral">Star Schema</span>
+            <span class="badge badge-neutral">3 DB Roles</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Timeline & Deliverables -->
+    <div class="section-header">
+      <h2>Execution Roadmap</h2>
+      <p>Structured rollout aligned with academic project milestones</p>
+    </div>
+
+    <div class="grid-3">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">Phase 1: Foundation</div>
+          <span class="badge badge-neutral">Weeks 1–3</span>
+        </div>
+        <div class="card-body">
+          <ul class="clean-list">
+            <li>JWT Auth &amp; Role Hierarchy (Admin, Manager, Employee)</li>
+            <li>Department, Employee, and Project master tables</li>
+            <li>Customer CRM and Product catalog CRUD APIs</li>
+            <li>PostgreSQL schema with flyway/JPA scripts</li>
+            <li>OpenAPI/Swagger documentation setup</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">Phase 2: Analytics &amp; ML</div>
+          <span class="badge badge-neutral">Weeks 4–6</span>
+        </div>
+        <div class="card-body">
+          <ul class="clean-list">
+            <li>Multi-line Sales Order status workflow</li>
+            <li>Customer review &amp; feedback collection module</li>
+            <li>Automated ETL pipeline hydrating star schema</li>
+            <li>Holt-Winters sales forecasting (3–24 months)</li>
+            <li>K-Means customer segmentation &amp; NLP sentiment</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">Phase 3: Production &amp; QA</div>
+          <span class="badge badge-neutral">Weeks 7–8</span>
+        </div>
+        <div class="card-body">
+          <ul class="clean-list">
+            <li>Multi-container Docker Compose orchestration</li>
+            <li>Nginx reverse proxy with TLS termination &amp; gzip</li>
+            <li>GitHub Actions CI/CD test automation</li>
+            <li>Security audit, PII scrubbing, and correlation IDs</li>
+            <li>Optional Apache Kafka real-time event pipeline</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ════════════════════ 2. ARCHITECTURE ════════════════════ -->
+  <section id="tab-architecture" class="section">
+    <div class="hero">
+      <div class="eyebrow">Technical Architecture</div>
+      <h1>System Architecture &amp; Data Pipeline</h1>
+      <p class="hero-subtitle">
+        How the client, security layer, reverse proxy, operational database, and analytical engine communicate across protected network boundaries.
+      </p>
+    </div>
+
+    <!-- Interactive Architecture Diagram -->
+    <div class="diagram-container">
+      <div class="section-header" style="margin-bottom:12px">
+        <h3>Component Topology &amp; Network Layout</h3>
+        <p>Click any component box to inspect its role, port, and security boundaries</p>
+      </div>
+
+      <svg id="archSvg" viewBox="0 0 760 320" style="width:100%;height:auto;display:block">
+        <defs>
+          <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+            <path d="M0 0L10 5L0 10z" fill="#94a3b8"/>
+          </marker>
+        </defs>
+        <!-- Connection Lines -->
+        <g stroke="#cbd5e1" stroke-width="1.5" fill="none" marker-end="url(#arrow)">
+          <path d="M140 70H195"/>
+          <path d="M315 70H370"/>
+          <path d="M490 70H545"/>
+          <path d="M430 100V190H325"/>
+          <path d="M250 220H175"/>
+          <path d="M605 100V190H455"/>
+        </g>
+
+        <!-- Nodes -->
+        <g class="an" data-id="browser" transform="translate(20,40)" style="cursor:pointer">
+          <rect width="120" height="60" rx="6" fill="#f8fafc" stroke="#94a3b8" stroke-width="1.5"/>
+          <text x="60" y="27" text-anchor="middle" font-family="'Outfit', sans-serif" font-weight="600" font-size="12" fill="#0f172a">Browser Client</text>
+          <text x="60" y="44" text-anchor="middle" font-family="'Plus Jakarta Sans', sans-serif" font-size="10" fill="#64748b">HTML5 / JS / Plotly</text>
+        </g>
+
+        <g class="an" data-id="nginx" transform="translate(195,40)" style="cursor:pointer">
+          <rect width="120" height="60" rx="6" fill="#f8fafc" stroke="#94a3b8" stroke-width="1.5"/>
+          <text x="60" y="27" text-anchor="middle" font-family="'Outfit', sans-serif" font-weight="600" font-size="12" fill="#0f172a">Nginx Proxy</text>
+          <text x="60" y="44" text-anchor="middle" font-family="'Plus Jakarta Sans', sans-serif" font-size="10" fill="#64748b">Port 80/443 (Edge)</text>
+        </g>
+
+        <g class="an" data-id="spring" transform="translate(370,40)" style="cursor:pointer">
+          <rect width="120" height="60" rx="6" fill="#f8fafc" stroke="#0f172a" stroke-width="2"/>
+          <text x="60" y="27" text-anchor="middle" font-family="'Outfit', sans-serif" font-weight="600" font-size="12" fill="#0f172a">Spring Boot</text>
+          <text x="60" y="44" text-anchor="middle" font-family="'Plus Jakarta Sans', sans-serif" font-size="10" fill="#64748b">Port 8080 (REST Core)</text>
+        </g>
+
+        <g class="an" data-id="db" transform="translate(545,40)" style="cursor:pointer">
+          <rect width="135" height="60" rx="6" fill="#f8fafc" stroke="#0f172a" stroke-width="2"/>
+          <text x="67" y="27" text-anchor="middle" font-family="'Outfit', sans-serif" font-weight="600" font-size="12" fill="#0f172a">PostgreSQL 16</text>
+          <text x="67" y="44" text-anchor="middle" font-family="'Plus Jakarta Sans', sans-serif" font-size="10" fill="#64748b">public + dw schemas</text>
+        </g>
+
+        <g class="an" data-id="fastapi" transform="translate(250,190)" style="cursor:pointer">
+          <rect width="135" height="60" rx="6" fill="#f8fafc" stroke="#475569" stroke-width="1.5"/>
+          <text x="67" y="27" text-anchor="middle" font-family="'Outfit', sans-serif" font-weight="600" font-size="12" fill="#0f172a">Python FastAPI</text>
+          <text x="67" y="44" text-anchor="middle" font-family="'Plus Jakarta Sans', sans-serif" font-size="10" fill="#64748b">Port 8000 (Analytics)</text>
+        </g>
+
+        <g class="an" data-id="csv" transform="translate(55,190)" style="cursor:pointer">
+          <rect width="120" height="60" rx="6" fill="#f8fafc" stroke="#94a3b8" stroke-width="1.5"/>
+          <text x="60" y="27" text-anchor="middle" font-family="'Outfit', sans-serif" font-weight="600" font-size="12" fill="#0f172a">CSV Data Sources</text>
+          <text x="60" y="44" text-anchor="middle" font-family="'Plus Jakarta Sans', sans-serif" font-size="10" fill="#64748b">Sales + Reviews</text>
+        </g>
+
+        <g class="an" data-id="kafka" transform="translate(455,190)" style="cursor:pointer">
+          <rect width="120" height="60" rx="6" fill="#f8fafc" stroke="#94a3b8" stroke-width="1.5" stroke-dasharray="3"/>
+          <text x="60" y="27" text-anchor="middle" font-family="'Outfit', sans-serif" font-weight="600" font-size="12" fill="#0f172a">Apache Kafka</text>
+          <text x="60" y="44" text-anchor="middle" font-family="'Plus Jakarta Sans', sans-serif" font-size="10" fill="#64748b">Phase 3 Live Feed</text>
+        </g>
+      </svg>
+
+      <!-- Active Inspection Panel -->
+      <div id="archInfo" class="diagram-info-panel">
+        <strong>Interactive Topology:</strong> Click on any component box above to see its technical responsibility, trust boundaries, and protocols.
+      </div>
+
+      <!-- Flow Trace Triggers -->
+      <div class="diagram-controls">
+        <span style="font-size:0.78rem;font-weight:600;color:var(--text-muted);text-transform:uppercase">Simulate Flow:</span>
+        <button class="btn" onclick="traceFlow('login')">1. User Authentication Flow</button>
+        <button class="btn" onclick="traceFlow('crud')">2. CRUD Entity Transaction</button>
+        <button class="btn" onclick="traceFlow('analytics')">3. Analytics Chart Generation</button>
+        <button class="btn" onclick="traceFlow('etl')">4. ETL Pipeline Batch Run</button>
+      </div>
+    </div>
+
+    <!-- Step Strip for Chart Generation -->
+    <div class="section-header">
+      <h2>Step-by-Step Data Flow: Chart Request</h2>
+      <p>How an analytics request travels across the secure internal bridge</p>
+    </div>
+
+    <div class="step-strip">
+      <div class="step-card">
+        <div class="step-card-num">Step 01</div>
+        <div class="step-card-title">User Interaction</div>
+        <p style="font-size:0.75rem;color:var(--text-muted);margin-top:4px">User chooses region / date filter on UI</p>
+      </div>
+      <div class="step-card">
+        <div class="step-card-num">Step 02</div>
+        <div class="step-card-title">Nginx Proxy</div>
+        <p style="font-size:0.75rem;color:var(--text-muted);margin-top:4px">Terminates SSL, routes <code>/api/*</code></p>
+      </div>
+      <div class="step-card">
+        <div class="step-card-num">Step 03</div>
+        <div class="step-card-title">Spring Auth</div>
+        <p style="font-size:0.75rem;color:var(--text-muted);margin-top:4px">Validates JWT cookie &amp; checks RBAC</p>
+      </div>
+      <div class="step-card">
+        <div class="step-card-num">Step 04</div>
+        <div class="step-card-title">Internal Bridge</div>
+        <p style="font-size:0.75rem;color:var(--text-muted);margin-top:4px">Forwards via <code>X-Internal-Key</code> to FastAPI</p>
+      </div>
+      <div class="step-card">
+        <div class="step-card-num">Step 05</div>
+        <div class="step-card-title">Warehouse Query</div>
+        <p style="font-size:0.75rem;color:var(--text-muted);margin-top:4px">FastAPI queries <code>dw</code> schema tables</p>
+      </div>
+      <div class="step-card">
+        <div class="step-card-num">Step 06</div>
+        <div class="step-card-title">Model / Aggregate</div>
+        <p style="font-size:0.75rem;color:var(--text-muted);margin-top:4px">Pandas / statsmodels computes metrics</p>
+      </div>
+      <div class="step-card">
+        <div class="step-card-num">Step 07</div>
+        <div class="step-card-title">Plotly JSON</div>
+        <p style="font-size:0.75rem;color:var(--text-muted);margin-top:4px">Returns figure data &amp; layout JSON</p>
+      </div>
+      <div class="step-card">
+        <div class="step-card-num">Step 08</div>
+        <div class="step-card-title">Browser Render</div>
+        <p style="font-size:0.75rem;color:var(--text-muted);margin-top:4px">Plotly.js dynamically plots chart</p>
+      </div>
+    </div>
+
+    <!-- Technology Matrix -->
+    <div class="section-header" style="margin-top:32px">
+      <h2>Technology Decision Matrix</h2>
+      <p>Architectural justifications for every technology selection</p>
+    </div>
+
+    <div class="table-wrapper">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Layer</th>
+            <th>Technology Chosen</th>
+            <th>Architectural Justification</th>
+            <th>Viva Defense Point</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Backend</strong></td>
+            <td>Java 21 / Spring Boot 3.3</td>
+            <td>Enterprise standard, strong typing, mature security filters, and JPA repository abstractions.</td>
+            <td>Layered separation: Controller → Service → Repository.</td>
+          </tr>
+          <tr>
+            <td><strong>Analytics</strong></td>
+            <td>Python 3.11 / FastAPI</td>
+            <td>Native ecosystem for machine learning (scikit-learn, statsmodels, pandas) with async I/O.</td>
+            <td>Isolated microservice; analytics crashes never take down operational CRUD.</td>
+          </tr>
+          <tr>
+            <td><strong>Database</strong></td>
+            <td>PostgreSQL 16</td>
+            <td>Native schema isolation (<code>public</code> vs <code>dw</code>), ACID compliance, and analytical window functions.</td>
+            <td>Supports both relational OLTP transactional integrity and OLAP star schemas.</td>
+          </tr>
+          <tr>
+            <td><strong>Security</strong></td>
+            <td>JWT + BCrypt-12</td>
+            <td>Stateless authentication preventing server session bloat; high work-factor password hashing.</td>
+            <td>Tokens stored in <code>httpOnly</code> cookies to mitigate XSS script theft.</td>
+          </tr>
+          <tr>
+            <td><strong>Reverse Proxy</strong></td>
+            <td>Nginx 1.25</td>
+            <td>Single edge entry point, SSL termination, static file compression, and connection buffering.</td>
+            <td>Internal ports (8080, 8000, 5432) remain invisible to the public internet.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ════════════════════ 3. WORKING FEATURES ════════════════════ -->
+  <section id="tab-features" class="section">
+    <div class="hero">
+      <div class="eyebrow">Functional Inventory</div>
+      <h1>Complete Working Features</h1>
+      <p class="hero-subtitle">
+        Comprehensive breakdown of the 8 Operational CRUD Modules, 12 Analytics Dashboards, and Enterprise Security Controls built into the CMS codebase.
+      </p>
+
+      <div class="quick-bar">
+        <div style="display:flex;gap:6px;flex-wrap:wrap">
+          <button class="btn btn-primary" onclick="filterFeatures('all', this)">All Features</button>
+          <button class="btn" onclick="filterFeatures('crud', this)">CRUD Modules (8)</button>
+          <button class="btn" onclick="filterFeatures('analytics', this)">Analytics Dashboards (12)</button>
+          <button class="btn" onclick="filterFeatures('security', this)">Security Controls (8)</button>
+        </div>
+        <div class="filter-search">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input type="text" id="featureSearchInput" placeholder="Quick search features (e.g. jwt, k-means, order)..." onkeyup="searchFeatures()">
+        </div>
+      </div>
+    </div>
+
+    <!-- Section A: 8 CRUD Modules -->
+    <div id="feature-group-crud">
+      <div class="section-header">
+        <h2>1. Operational CRUD Modules (8)</h2>
+        <p>Core business transactional entities managed by Spring Boot REST services</p>
+      </div>
+
+      <!-- Module 1 -->
+      <div class="feature-item open" data-category="crud" data-search="authentication users jwt rbac bcrypt login rate limit">
+        <div class="feature-summary" onclick="toggleFeature(this.parentElement)">
+          <div class="feature-summary-left">
+            <span class="feature-num">MOD 01</span>
+            <div>
+              <div class="feature-title-text">Authentication &amp; User Access Management</div>
+              <div class="feature-subtitle-text">Stateless JWT authentication, password hashing, and role-based permissions</div>
+            </div>
+          </div>
+          <div class="feature-summary-right">
+            <span class="badge badge-neutral">All Roles</span>
+            <svg class="feature-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+        </div>
+        <div class="feature-details">
+          <div class="feature-details-grid">
+            <div class="feature-details-col">
+              <h5>Implemented Capabilities</h5>
+              <ul class="clean-list">
+                <li><strong>Stateless JWT Authentication:</strong> Issues HS256 signed JSON Web Tokens with 30-minute expiry containing user ID, role, and unique <code>jti</code> claim.</li>
+                <li><strong>Dual Transport Support:</strong> Token delivered in secure <code>httpOnly</code> cookie for browser safety and accepts <code>Authorization: Bearer</code> headers for REST/Postman clients.</li>
+                <li><strong>Token Revocation / Denylist:</strong> On logout, token ID is registered in an in-memory denylist preventing reuse until natural expiration.</li>
+                <li><strong>Brute-Force Rate Limiting:</strong> Enforces max 5 failed login attempts per minute per IP using Bucket4j; triggers HTTP 429 Too Many Requests.</li>
+              </ul>
+            </div>
+            <div class="feature-details-col">
+              <h5>Database &amp; Code Artifacts</h5>
+              <ul class="clean-list">
+                <li><strong>Table:</strong> <code>user_account (id, email, password_hash, role, enabled, employee_id)</code></li>
+                <li><strong>Security Filters:</strong> <code>JwtAuthFilter</code>, <code>RateLimitFilter</code>, <code>UserDetailsServiceImpl</code></li>
+                <li><strong>Password Defense:</strong> BCrypt strength 12 (approx. 300ms per verification).</li>
+                <li><strong>Self-Service:</strong> <code>POST /api/auth/change-password</code> with mandatory old password verification.</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Module 2 -->
+      <div class="feature-item" data-category="crud" data-search="departments company structure guard delete cascade employee">
+        <div class="feature-summary" onclick="toggleFeature(this.parentElement)">
+          <div class="feature-summary-left">
+            <span class="feature-num">MOD 02</span>
+            <div>
+              <div class="feature-title-text">Department Management</div>
+              <div class="feature-subtitle-text">Corporate organizational hierarchy with integrity guards</div>
+            </div>
+          </div>
+          <div class="feature-summary-right">
+            <span class="badge badge-neutral">Admin Only (Write)</span>
+            <svg class="feature-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+        </div>
+        <div class="feature-details">
+          <div class="feature-details-grid">
+            <div class="feature-details-col">
+              <h5>Implemented Capabilities</h5>
+              <ul class="clean-list">
+                <li><strong>Full CRUD Operations:</strong> Complete REST endpoints to create, list, inspect, update, and remove corporate departments.</li>
+                <li><strong>Unique Name Constraint:</strong> Enforced at both database schema and JPA entity level to prevent naming duplicates.</li>
+                <li><strong>Referential Deletion Guard:</strong> If employees are actively assigned to a department, deletion is blocked, returning a friendly <code>409 Conflict</code>.</li>
+                <li><strong>Role Differentiation:</strong> Admin has full write privileges; Managers and Employees hold read-only listing privileges.</li>
+              </ul>
+            </div>
+            <div class="feature-details-col">
+              <h5>Database &amp; Code Artifacts</h5>
+              <ul class="clean-list">
+                <li><strong>Table:</strong> <code>department (id, name UNIQUE, description, location)</code></li>
+                <li><strong>Controller &amp; Service:</strong> <code>DepartmentController.java</code>, <code>DepartmentService.java</code></li>
+                <li><strong>Relationship:</strong> <code>@OneToMany(mappedBy = "department")</code> linking to Employee entity.</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Module 3 -->
+      <div class="feature-item" data-category="crud" data-search="employees staff soft delete pii salary anonymization hierarchy">
+        <div class="feature-summary" onclick="toggleFeature(this.parentElement)">
+          <div class="feature-summary-left">
+            <span class="feature-num">MOD 03</span>
+            <div>
+              <div class="feature-title-text">Employee Directory &amp; Lifecycle</div>
+              <div class="feature-subtitle-text">Staff management with manager hierarchy, PII privacy, and soft-delete</div>
+            </div>
+          </div>
+          <div class="feature-summary-right">
+            <span class="badge badge-neutral">Admin &amp; Manager</span>
+            <svg class="feature-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+        </div>
+        <div class="feature-details">
+          <div class="feature-details-grid">
+            <div class="feature-details-col">
+              <h5>Implemented Capabilities</h5>
+              <ul class="clean-list">
+                <li><strong>Complete Staff Lifecycle:</strong> Hire date, job title, unique employee code, department assignment, and reporting manager link.</li>
+                <li><strong>Salary &amp; PII Confidentiality:</strong> Salaries and birth dates are scrubbed from DTO responses unless requested by an authenticated Admin.</li>
+                <li><strong>Search &amp; Pagination:</strong> Full pagination with sorting (<code>?page=0&amp;size=20&amp;sort=lastName,asc</code>) and filtering by department and status.</li>
+                <li><strong>Soft-Delete with Anonymization:</strong> Deleting an employee with sales history flags status as INACTIVE and redacts sensitive PII instead of hard-deleting.</li>
+              </ul>
+            </div>
+            <div class="feature-details-col">
+              <h5>Database &amp; Code Artifacts</h5>
+              <ul class="clean-list">
+                <li><strong>Table:</strong> <code>employee (id, employee_code, first_name, last_name, email, phone, salary, status, department_id, manager_id)</code></li>
+                <li><strong>Self-Join Mapping:</strong> <code>@ManyToOne Employee manager</code> for organizational trees.</li>
+                <li><strong>Controller &amp; Service:</strong> <code>EmployeeController.java</code>, <code>EmployeeService.java</code></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Module 4 -->
+      <div class="feature-item" data-category="crud" data-search="projects teams assignment many to many deadlines">
+        <div class="feature-summary" onclick="toggleFeature(this.parentElement)">
+          <div class="feature-summary-left">
+            <span class="feature-num">MOD 04</span>
+            <div>
+              <div class="feature-title-text">Project Portfolio &amp; Team Allocations</div>
+              <div class="feature-subtitle-text">Cross-functional project tracking with Many-to-Many employee assignment</div>
+            </div>
+          </div>
+          <div class="feature-summary-right">
+            <span class="badge badge-neutral">Manager &amp; Admin</span>
+            <svg class="feature-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+        </div>
+        <div class="feature-details">
+          <div class="feature-details-grid">
+            <div class="feature-details-col">
+              <h5>Implemented Capabilities</h5>
+              <ul class="clean-list">
+                <li><strong>Project Lifecycle Tracking:</strong> Track initiatives across status phases: <code>PLANNED → ACTIVE → DONE</code> with start and target completion dates.</li>
+                <li><strong>Team Assignment (N:N):</strong> Admin and Managers can assign or unassign multiple employees to projects without duplicating records.</li>
+                <li><strong>Scoped Visibility:</strong> Employees can view only projects where they are explicitly assigned; Managers view all department projects.</li>
+                <li><strong>Validation Constraints:</strong> Validates that project completion dates must occur after start dates.</li>
+              </ul>
+            </div>
+            <div class="feature-details-col">
+              <h5>Database &amp; Code Artifacts</h5>
+              <ul class="clean-list">
+                <li><strong>Tables:</strong> <code>project (id, name, start_date, end_date, status, department_id)</code> and join table <code>project_employee (project_id, employee_id)</code></li>
+                <li><strong>JPA Mapping:</strong> <code>@ManyToMany @JoinTable(name = "project_employee")</code></li>
+                <li><strong>Controller &amp; Service:</strong> <code>ProjectController.java</code>, <code>ProjectService.java</code></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Module 5 -->
+      <div class="feature-item" data-category="crud" data-search="customers crm regions north south east west central segmentation">
+        <div class="feature-summary" onclick="toggleFeature(this.parentElement)">
+          <div class="feature-summary-left">
+            <span class="feature-num">MOD 05</span>
+            <div>
+              <div class="feature-title-text">Customer Relationship Directory (CRM)</div>
+              <div class="feature-subtitle-text">Geographic customer directory feeding analytics segmentation models</div>
+            </div>
+          </div>
+          <div class="feature-summary-right">
+            <span class="badge badge-neutral">Manager &amp; Admin</span>
+            <svg class="feature-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+        </div>
+        <div class="feature-details">
+          <div class="feature-details-grid">
+            <div class="feature-details-col">
+              <h5>Implemented Capabilities</h5>
+              <ul class="clean-list">
+                <li><strong>Customer Records:</strong> Full profile management capturing legal customer name, primary contact email, phone, and geographic region.</li>
+                <li><strong>5 Standard Geographic Regions:</strong> Standardized enum: <code>NORTH, SOUTH, EAST, WEST, CENTRAL</code> used for regional sales distribution.</li>
+                <li><strong>Unique Email Constraints:</strong> Prevents duplicate customer registrations; integrates with order placement.</li>
+                <li><strong>Analytics Bridge:</strong> Customer ID and region form the basis of the RFM segmentation model in the Python microservice.</li>
+              </ul>
+            </div>
+            <div class="feature-details-col">
+              <h5>Database &amp; Code Artifacts</h5>
+              <ul class="clean-list">
+                <li><strong>Table:</strong> <code>customer (id, name, email UNIQUE, phone, region, created_at)</code></li>
+                <li><strong>Controller &amp; Service:</strong> <code>CustomerController.java</code>, <code>CustomerService.java</code></li>
+                <li><strong>Enums:</strong> <code>Region.java</code></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Module 6 -->
+      <div class="feature-item" data-category="crud" data-search="products catalog sku pricing unit cost margins active flag">
+        <div class="feature-summary" onclick="toggleFeature(this.parentElement)">
+          <div class="feature-summary-left">
+            <span class="feature-num">MOD 06</span>
+            <div>
+              <div class="feature-title-text">Product Catalog &amp; Margin Tracking</div>
+              <div class="feature-subtitle-text">SKU inventory with unit price, production cost, and active flags</div>
+            </div>
+          </div>
+          <div class="feature-summary-right">
+            <span class="badge badge-neutral">All Roles (Read)</span>
+            <svg class="feature-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+        </div>
+        <div class="feature-details">
+          <div class="feature-details-grid">
+            <div class="feature-details-col">
+              <h5>Implemented Capabilities</h5>
+              <ul class="clean-list">
+                <li><strong>Unique SKU Management:</strong> Products are indexed by standard unique SKU identifiers with product name and category.</li>
+                <li><strong>Price &amp; Cost Separation:</strong> Stores both unit sales price and unit production cost, enabling gross margin computations.</li>
+                <li><strong>Price Snapshot Integrity:</strong> When orders are placed, the product price is permanently snapshotted to protect past order ledger integrity.</li>
+                <li><strong>Active / Inactive Flag:</strong> Products can be soft-disabled to prevent new orders while maintaining historical sales integrity.</li>
+              </ul>
+            </div>
+            <div class="feature-details-col">
+              <h5>Database &amp; Code Artifacts</h5>
+              <ul class="clean-list">
+                <li><strong>Table:</strong> <code>product (id, sku UNIQUE, name, category, unit_price, unit_cost, active)</code></li>
+                <li><strong>Validation:</strong> <code>@Positive</code> price and cost constraints.</li>
+                <li><strong>Controller &amp; Service:</strong> <code>ProductController.java</code>, <code>ProductService.java</code></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Module 7 -->
+      <div class="feature-item" data-category="crud" data-search="sales orders multi line discount workflow state machine audit trail">
+        <div class="feature-summary" onclick="toggleFeature(this.parentElement)">
+          <div class="feature-summary-left">
+            <span class="feature-num">MOD 07</span>
+            <div>
+              <div class="feature-title-text">Sales Order Processing &amp; State Machine</div>
+              <div class="feature-subtitle-text">Multi-item orders with server-side totals, discount caps, and status tracking</div>
+            </div>
+          </div>
+          <div class="feature-summary-right">
+            <span class="badge badge-neutral">All Roles (Scoped)</span>
+            <svg class="feature-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+        </div>
+        <div class="feature-details">
+          <div class="feature-details-grid">
+            <div class="feature-details-col">
+              <h5>Implemented Capabilities</h5>
+              <ul class="clean-list">
+                <li><strong>Server-Side Pricing Engine:</strong> Line items, discounts (strictly capped 0–30%), and total amounts are computed solely on the server.</li>
+                <li><strong>Forward-Only Status Workflow:</strong> Enforces valid state jumps: <code>INQUIRY → QUOTED → CONFIRMED → PAID → DELIVERED</code> (or <code>CANCELLED</code> before delivery).</li>
+                <li><strong>Append-Only Audit History:</strong> Every status transition automatically logs a record in <code>order_status_history</code> with timestamp and user ID.</li>
+                <li><strong>Rep Ownership Scoping:</strong> Sales representatives (Employees) can only view and create orders assigned to their own rep ID.</li>
+              </ul>
+            </div>
+            <div class="feature-details-col">
+              <h5>Database &amp; Code Artifacts</h5>
+              <ul class="clean-list">
+                <li><strong>Tables:</strong> <code>sale_order</code>, <code>order_item</code> (cascade ALL, orphan removal), <code>order_status_history</code></li>
+                <li><strong>State Machine:</strong> Validated in <code>SalesOrderService.java</code>; invalid jumps yield <code>409 Conflict</code>.</li>
+                <li><strong>Controller &amp; Service:</strong> <code>SalesOrderController.java</code>, <code>SalesOrderService.java</code></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Module 8 -->
+      <div class="feature-item" data-category="crud" data-search="feedback ratings reviews nlp textblob sentiment csat">
+        <div class="feature-summary" onclick="toggleFeature(this.parentElement)">
+          <div class="feature-summary-left">
+            <span class="feature-num">MOD 08</span>
+            <div>
+              <div class="feature-title-text">Customer Feedback &amp; Review System</div>
+              <div class="feature-subtitle-text">Star ratings and qualitative text reviews linked to customers, orders, and products</div>
+            </div>
+          </div>
+          <div class="feature-summary-right">
+            <span class="badge badge-neutral">Manager &amp; Admin</span>
+            <svg class="feature-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+        </div>
+        <div class="feature-details">
+          <div class="feature-details-grid">
+            <div class="feature-details-col">
+              <h5>Implemented Capabilities</h5>
+              <ul class="clean-list">
+                <li><strong>Quantitative Ratings:</strong> Enforces 1 to 5 integer star ratings via <code>@Min(1) @Max(5)</code> Bean Validation.</li>
+                <li><strong>Qualitative Review Comments:</strong> Captures textual feedback directly linkable to specific orders and products.</li>
+                <li><strong>NLP Ingestion Corpus:</strong> The feedback table forms Source 1 (S1) of the text analytics pipeline, feeding sentiment classification.</li>
+                <li><strong>Admin Moderation:</strong> Feedback can be filtered by rating score, product ID, and date range; Admin can edit or delete entries.</li>
+              </ul>
+            </div>
+            <div class="feature-details-col">
+              <h5>Database &amp; Code Artifacts</h5>
+              <ul class="clean-list">
+                <li><strong>Table:</strong> <code>feedback (id, customer_id, product_id, order_id, rating, comment, created_at)</code></li>
+                <li><strong>Controller &amp; Service:</strong> <code>FeedbackController.java</code>, <code>FeedbackService.java</code></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Section B: 12 Analytics Dashboards -->
+    <div id="feature-group-analytics" style="margin-top:36px">
+      <div class="section-header">
+        <h2>2. Analytical Dashboards &amp; Machine Learning (12)</h2>
+        <p>Interactive visualizations and predictive algorithms computed in Python FastAPI</p>
+      </div>
+
+      <div class="grid-3">
+        <div class="card" data-category="analytics" data-search="kpi revenue profit margin aov an1">
+          <div class="card-header">
+            <div>
+              <div class="card-title">AN-01: Executive KPIs</div>
+              <div class="card-meta">Real-time financial aggregates</div>
+            </div>
+            <span class="badge badge-neutral">SQL + Pandas</span>
+          </div>
+          <div class="card-body">
+            <p>Calculates total revenue, gross profit, profit margin percentage, month-over-month revenue growth rate, total order count, and Average Order Value (AOV).</p>
+          </div>
+        </div>
+
+        <div class="card" data-category="analytics" data-search="sales profit trend time series plotly an2">
+          <div class="card-header">
+            <div>
+              <div class="card-title">AN-02: Sales &amp; Profit Trends</div>
+              <div class="card-meta">Interactive time-series line chart</div>
+            </div>
+            <span class="badge badge-neutral">Plotly.js</span>
+          </div>
+          <div class="card-body">
+            <p>Dual-axis time-series visualization showing monthly sales volume and profit curves with interactive zooming, panning, and breakdown by product category.</p>
+          </div>
+        </div>
+
+        <div class="card" data-category="analytics" data-search="regional performance geographic heatmap an3">
+          <div class="card-header">
+            <div>
+              <div class="card-title">AN-03: Regional Performance</div>
+              <div class="card-meta">Geographic comparison &amp; heatmap</div>
+            </div>
+            <span class="badge badge-neutral">Plotly Heatmap</span>
+          </div>
+          <div class="card-body">
+            <p>Compares revenue and unit volume across the 5 regions (North, South, East, West, Central) with a month-by-region density matrix.</p>
+          </div>
+        </div>
+
+        <div class="card" data-category="analytics" data-search="sales funnel conversion drop off stages an4">
+          <div class="card-header">
+            <div>
+              <div class="card-title">AN-04: Sales Funnel</div>
+              <div class="card-meta">Pipeline conversion drop-off</div>
+            </div>
+            <span class="badge badge-neutral">Plotly Funnel</span>
+          </div>
+          <div class="card-body">
+            <p>Visualizes stage-by-stage conversion from Inquiry → Quoted → Confirmed → Paid → Delivered, quantifying conversion drop-off percentages.</p>
+          </div>
+        </div>
+
+        <div class="card" data-category="analytics" data-search="forecast holt winters time series ml mape an5">
+          <div class="card-header">
+            <div>
+              <div class="card-title">AN-05: Sales Forecasting</div>
+              <div class="card-meta">ML Model 1: Holt-Winters</div>
+            </div>
+            <span class="badge badge-neutral">statsmodels</span>
+          </div>
+          <div class="card-body">
+            <p>Exponential smoothing time-series model predicting 3 to 24 months of future monthly revenue. Displays 95% confidence bands and Mean Absolute Percentage Error (MAPE).</p>
+          </div>
+        </div>
+
+        <div class="card" data-category="analytics" data-search="customer segments k-means rfm clustering ml an6">
+          <div class="card-header">
+            <div>
+              <div class="card-title">AN-06: Customer Segments</div>
+              <div class="card-meta">ML Model 2: K-Means Clustering</div>
+            </div>
+            <span class="badge badge-neutral">scikit-learn</span>
+          </div>
+          <div class="card-body">
+            <p>Unsupervised K-Means clustering (k=2 to 8) on customer Recency, Frequency, and Monetary (RFM) metrics. Visualizes clusters with silhouette score reporting.</p>
+          </div>
+        </div>
+
+        <div class="card" data-category="analytics" data-search="sentiment analysis textblob nlp keywords nps an7">
+          <div class="card-header">
+            <div>
+              <div class="card-title">AN-07: Sentiment Analysis</div>
+              <div class="card-meta">ML Model 3: TextBlob NLP</div>
+            </div>
+            <span class="badge badge-neutral">TextBlob NLP</span>
+          </div>
+          <div class="card-body">
+            <p>Natural language processing on customer reviews classifying polarity (Positive, Neutral, Negative). Extracts top keyword tokens, aspect mentions, and Net Promoter Score (NPS).</p>
+          </div>
+        </div>
+
+        <div class="card" data-category="analytics" data-search="unified report multi source merge pandas an8">
+          <div class="card-header">
+            <div>
+              <div class="card-title">AN-08: Unified Multi-Source Report</div>
+              <div class="card-meta">3-source relational merge</div>
+            </div>
+            <span class="badge badge-neutral">Pandas Join</span>
+          </div>
+          <div class="card-body">
+            <p>Joins operational database orders with external historical sales CSV and customer review scores to produce comprehensive department performance tables.</p>
+          </div>
+        </div>
+
+        <div class="card" data-category="analytics" data-search="advanced plots seaborn matplotlib correlation heatmap an9">
+          <div class="card-header">
+            <div>
+              <div class="card-title">AN-09: Advanced Statistical Plots</div>
+              <div class="card-meta">Static publication-ready charts</div>
+            </div>
+            <span class="badge badge-neutral">Seaborn / Matplotlib</span>
+          </div>
+          <div class="card-body">
+            <p>Generates high-resolution PNG charts: Pearson correlation matrix heatmaps, box/whisker distribution plots for outliers, and pair plots.</p>
+          </div>
+        </div>
+
+        <div class="card" data-category="analytics" data-search="live sales feed kafka streaming real time an10">
+          <div class="card-header">
+            <div>
+              <div class="card-title">AN-10: Live Sales Event Stream</div>
+              <div class="card-meta">Real-time messaging architecture</div>
+            </div>
+            <span class="badge badge-neutral">Apache Kafka</span>
+          </div>
+          <div class="card-body">
+            <p>Phase 3 event streaming architecture where Spring publishes order events after transaction commit; Python consumer updates live running daily totals.</p>
+          </div>
+        </div>
+
+        <div class="card" data-category="analytics" data-search="etl pipeline status run logs trigger an11">
+          <div class="card-header">
+            <div>
+              <div class="card-title">AN-11: ETL Pipeline Health</div>
+              <div class="card-meta">Operational telemetry &amp; logs</div>
+            </div>
+            <span class="badge badge-neutral">Admin Trigger</span>
+          </div>
+          <div class="card-body">
+            <p>Displays last run timestamp, rows extracted vs loaded, rejected rows count, and data quality checks. Features a manual "Run ETL Now" API trigger.</p>
+          </div>
+        </div>
+
+        <div class="card" data-category="analytics" data-search="my performance employee personal sales quota an12">
+          <div class="card-header">
+            <div>
+              <div class="card-title">AN-12: My Performance Card</div>
+              <div class="card-meta">Employee-scoped dashboard</div>
+            </div>
+            <span class="badge badge-neutral">Employee Scope</span>
+          </div>
+          <div class="card-body">
+            <p>Personalized sales scorecard showing orders attributed to the authenticated sales representative, personal revenue, and quote conversion rate.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Section C: 8 Security Controls -->
+    <div id="feature-group-security" style="margin-top:36px">
+      <div class="section-header">
+        <h2>3. Enterprise Security Controls (8)</h2>
+        <p>Hardened security architecture preventing common web vulnerabilities</p>
+      </div>
+
+      <div class="grid-4">
+        <div class="card" data-category="security" data-search="jwt httponly cookie stateless">
+          <div class="card-title" style="font-size:0.9rem">1. JWT Cookie Protection</div>
+          <p style="font-size:0.8rem;color:var(--text-muted);margin-top:6px">JWT tokens stored in <code>httpOnly</code>, <code>Secure</code>, <code>SameSite=Strict</code> cookies to prevent client-side JavaScript theft via XSS.</p>
+        </div>
+        <div class="card" data-category="security" data-search="bcrypt password hashing 12">
+          <div class="card-title" style="font-size:0.9rem">2. BCrypt-12 Hashing</div>
+          <p style="font-size:0.8rem;color:var(--text-muted);margin-top:6px">Passwords hashed with BCrypt at work factor 12. Password hashes are never written to logs or returned in DTOs.</p>
+        </div>
+        <div class="card" data-category="security" data-search="rate limiting bucket4j brute force 429">
+          <div class="card-title" style="font-size:0.9rem">3. Brute-Force Rate Limiting</div>
+          <p style="font-size:0.8rem;color:var(--text-muted);margin-top:6px">In-memory rate limiting rejects IP addresses exceeding 5 failed login attempts in 60 seconds with HTTP 429.</p>
+        </div>
+        <div class="card" data-category="security" data-search="rbac preauthorize method security roles">
+          <div class="card-title" style="font-size:0.9rem">4. Method-Level RBAC</div>
+          <p style="font-size:0.8rem;color:var(--text-muted);margin-top:6px">Enforced twice: at HTTP security filter level and service method level using Spring <code>@PreAuthorize</code> annotations.</p>
+        </div>
+        <div class="card" data-category="security" data-search="idor horizontal privilege escalation scoping">
+          <div class="card-title" style="font-size:0.9rem">5. IDOR Defense</div>
+          <p style="font-size:0.8rem;color:var(--text-muted);margin-top:6px">Resource access validates caller ownership on the server; employees cannot inspect other staff members' data or orders.</p>
+        </div>
+        <div class="card" data-category="security" data-search="security headers csp hsts frame options">
+          <div class="card-title" style="font-size:0.9rem">6. HTTP Security Headers</div>
+          <p style="font-size:0.8rem;color:var(--text-muted);margin-top:6px">Strict Content-Security-Policy (CSP), <code>X-Frame-Options: DENY</code>, <code>X-Content-Type-Options: nosniff</code>, and HSTS enabled.</p>
+        </div>
+        <div class="card" data-category="security" data-search="pii scrubbing gdpr privacy warehouse etl">
+          <div class="card-title" style="font-size:0.9rem">7. PII Scrubbing in ETL</div>
+          <p style="font-size:0.8rem;color:var(--text-muted);margin-top:6px">The analytics ETL pipeline strictly scrubs emails, phone numbers, and salaries before loading into the warehouse.</p>
+        </div>
+        <div class="card" data-category="security" data-search="correlation id error masking debugging">
+          <div class="card-title" style="font-size:0.9rem">8. Correlation IDs</div>
+          <p style="font-size:0.8rem;color:var(--text-muted);margin-top:6px">Production errors mask internal stack traces, returning a unique correlation UUID for server-side troubleshooting.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ════════════════════ 4. PRD BLUEPRINT ════════════════════ -->
+  <section id="tab-prd" class="section">
+    <div class="hero">
+      <div class="eyebrow">Academic &amp; Business Specification</div>
+      <h1>Product Requirements Document (PRD)</h1>
+      <p class="hero-subtitle">
+        The formal blueprint defining WHAT the system must do, for WHOM, and HOW success is evaluated prior to code implementation.
+      </p>
+    </div>
+
+    <!-- What is a PRD Callout -->
+    <div class="callout">
+      <div class="callout-title">What is a Product Requirements Document (PRD)?</div>
+      <div class="callout-text">
+        A PRD establishes the functional boundaries, business objectives, user roles, and measurable success criteria of software from the stakeholder's perspective. It answers <strong>"WHAT problem are we solving?"</strong> and <strong>"WHY are we building this?"</strong> before technical implementation begins.
+      </div>
+    </div>
+
+    <!-- Role Permission Matrix -->
+    <div class="section-header">
+      <h2>Role-Based Permission Matrix</h2>
+      <p>Authorization privileges across system resources (C=Create, R=Read, U=Update, D=Delete)</p>
+    </div>
+
+    <div class="table-wrapper">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Module Domain</th>
+            <th>Admin Role</th>
+            <th>Manager Role</th>
+            <th>Employee Role</th>
+            <th>Enforcement Point</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>User Accounts &amp; Roles</strong></td>
+            <td><span class="badge badge-green">Full CRUD</span></td>
+            <td><span class="badge badge-red">No Access</span></td>
+            <td><span class="badge badge-red">No Access</span></td>
+            <td><code>SecurityFilterChain</code> (Admin Only)</td>
+          </tr>
+          <tr>
+            <td><strong>Department Hierarchy</strong></td>
+            <td><span class="badge badge-green">Full CRUD</span></td>
+            <td><span class="badge badge-neutral">Read Only</span></td>
+            <td><span class="badge badge-neutral">Read Only</span></td>
+            <td><code>@PreAuthorize("hasRole('ADMIN')")</code> on writes</td>
+          </tr>
+          <tr>
+            <td><strong>Employee Records</strong></td>
+            <td><span class="badge badge-green">Full CRUD (All fields)</span></td>
+            <td><span class="badge badge-amber">Read (Dept only, No salary)</span></td>
+            <td><span class="badge badge-blue">Read (Own profile only)</span></td>
+            <td>Service Layer Ownership Filtering</td>
+          </tr>
+          <tr>
+            <td><strong>Project Tracking</strong></td>
+            <td><span class="badge badge-green">Full CRUD</span></td>
+            <td><span class="badge badge-green">Create, Read, Update</span></td>
+            <td><span class="badge badge-blue">Read (Assigned only)</span></td>
+            <td>Repository query filter by employee ID</td>
+          </tr>
+          <tr>
+            <td><strong>Customer CRM</strong></td>
+            <td><span class="badge badge-green">Full CRUD</span></td>
+            <td><span class="badge badge-green">Create, Read, Update</span></td>
+            <td><span class="badge badge-red">No Access</span></td>
+            <td><code>@PreAuthorize("hasAnyRole('ADMIN','MANAGER')")</code></td>
+          </tr>
+          <tr>
+            <td><strong>Product Catalog</strong></td>
+            <td><span class="badge badge-green">Full CRUD</span></td>
+            <td><span class="badge badge-green">Create, Read, Update</span></td>
+            <td><span class="badge badge-neutral">Read Only</span></td>
+            <td>Public catalog listing / protected edits</td>
+          </tr>
+          <tr>
+            <td><strong>Sales Orders</strong></td>
+            <td><span class="badge badge-green">Full CRUD</span></td>
+            <td><span class="badge badge-green">CRU + Status Workflow</span></td>
+            <td><span class="badge badge-blue">Create + Read Own</span></td>
+            <td>Service checks <code>salesRep.id == currentUser.id</code></td>
+          </tr>
+          <tr>
+            <td><strong>Customer Feedback</strong></td>
+            <td><span class="badge badge-green">Full CRUD</span></td>
+            <td><span class="badge badge-green">Create + Read</span></td>
+            <td><span class="badge badge-red">No Access</span></td>
+            <td>Admin moderation privileges</td>
+          </tr>
+          <tr>
+            <td><strong>Analytics &amp; ML</strong></td>
+            <td><span class="badge badge-green">All Dashboards + Run ETL</span></td>
+            <td><span class="badge badge-green">All Dashboards</span></td>
+            <td><span class="badge badge-blue">My Performance Card</span></td>
+            <td>Proxy routes checked by Spring Security</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Functional Requirements Accordion -->
+    <div class="section-header">
+      <h2>Functional Requirements Catalog</h2>
+      <p>Click any category to expand individual functional requirements</p>
+    </div>
+
+    <div class="feature-item open">
+      <div class="feature-summary" onclick="toggleFeature(this.parentElement)">
+        <div class="feature-summary-left">
+          <span class="feature-num">FR-AUTH</span>
+          <div class="feature-title-text">Authentication &amp; User Specifications</div>
+        </div>
+        <svg class="feature-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+      </div>
+      <div class="feature-details">
+        <ul class="clean-list" style="margin-top:12px">
+          <li><strong>FR-AUTH-1:</strong> A user can log in with valid email/password and receives a cryptographically signed JWT token.</li>
+          <li><strong>FR-AUTH-2:</strong> On logout, the token JTI is blacklisted; subsequent requests using that token are rejected with 401 Unauthorized.</li>
+          <li><strong>FR-AUTH-3:</strong> Every API endpoint requires authentication except <code>/api/auth/login</code> and health checks.</li>
+          <li><strong>FR-AUTH-4:</strong> Only an Admin can create new user accounts; no self-service public registration is permitted.</li>
+          <li><strong>FR-AUTH-5:</strong> Repeated failed login attempts (5 per minute) are rate-limited with HTTP 429.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="feature-item">
+      <div class="feature-summary" onclick="toggleFeature(this.parentElement)">
+        <div class="feature-summary-left">
+          <span class="feature-num">FR-ORD</span>
+          <div class="feature-title-text">Sales Order Processing Specifications</div>
+        </div>
+        <svg class="feature-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+      </div>
+      <div class="feature-details">
+        <ul class="clean-list" style="margin-top:12px">
+          <li><strong>FR-ORD-1:</strong> Order line item calculations and discounts are strictly validated on the server. Client totals are ignored.</li>
+          <li><strong>FR-ORD-2:</strong> Order status must strictly follow the workflow: <code>INQUIRY → QUOTED → CONFIRMED → PAID → DELIVERED</code>.</li>
+          <li><strong>FR-ORD-3:</strong> Orders may transition to <code>CANCELLED</code> only before reaching the <code>DELIVERED</code> state.</li>
+          <li><strong>FR-ORD-4:</strong> Every status transition must record an audit entry in <code>order_status_history</code>.</li>
+          <li><strong>FR-ORD-5:</strong> Order discounts are restricted between 0.00% and 30.00%. Quantities must be greater than or equal to 1.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="feature-item">
+      <div class="feature-summary" onclick="toggleFeature(this.parentElement)">
+        <div class="feature-summary-left">
+          <span class="feature-num">FR-ANL</span>
+          <div class="feature-title-text">Analytics &amp; Data Warehouse Specifications</div>
+        </div>
+        <svg class="feature-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+      </div>
+      <div class="feature-details">
+        <ul class="clean-list" style="margin-top:12px">
+          <li><strong>FR-ANL-1:</strong> Analytical charts must support interactive filtering (date ranges, regions, product categories).</li>
+          <li><strong>FR-ANL-2:</strong> Holt-Winters exponential smoothing forecasting must provide configurable horizons (3 to 24 months) and report MAPE accuracy.</li>
+          <li><strong>FR-ANL-3:</strong> K-Means clustering must calculate RFM metrics and report silhouette scores.</li>
+          <li><strong>FR-ANL-4:</strong> Customer reviews must be parsed using TextBlob NLP to classify polarity and aspect ratings.</li>
+          <li><strong>FR-ANL-5:</strong> The ETL pipeline must run idempotently, cleaning nulls and logging extraction and rejection counts.</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Success Metrics Summary -->
+    <div class="section-header" style="margin-top:32px">
+      <h2>Evaluation &amp; Success Verification</h2>
+      <p>Target metrics achieved across academic evaluation criteria</p>
+    </div>
+
+    <div class="grid-4">
+      <div class="card">
+        <div class="stat-val" style="color:var(--c-green)">12 / 12</div>
+        <div class="stat-desc">Java FSD Eval Points</div>
+        <p style="font-size:0.78rem;color:var(--text-muted);margin-top:6px">100% compliance with full-stack Java evaluation criteria.</p>
+      </div>
+      <div class="card">
+        <div class="stat-val" style="color:var(--c-green)">14 / 14</div>
+        <div class="stat-desc">Analytics Objectives</div>
+        <p style="font-size:0.78rem;color:var(--text-muted);margin-top:6px">Full delivery of ETL, warehouse, ML, and visualization goals.</p>
+      </div>
+      <div class="card">
+        <div class="stat-val">&lt; 500ms</div>
+        <div class="stat-desc">CRUD Response Time</div>
+        <p style="font-size:0.78rem;color:var(--text-muted);margin-top:6px">95th percentile latency across indexed relational queries.</p>
+      </div>
+      <div class="card">
+        <div class="stat-val">&lt; 3.0s</div>
+        <div class="stat-desc">Dashboard Rendering</div>
+        <p style="font-size:0.78rem;color:var(--text-muted);margin-top:6px">Fast analytical query response with 5-minute cache.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ════════════════════ 5. TRD SPECIFICATION ════════════════════ -->
+  <section id="tab-trd" class="section">
+    <div class="hero">
+      <div class="eyebrow">Technical Architecture Specification</div>
+      <h1>Technical Requirements Document (TRD)</h1>
+      <p class="hero-subtitle">
+        How the system is technically designed: layered patterns, database schemas, REST conventions, JWT security lifecycle, and testing frameworks.
+      </p>
+    </div>
+
+    <!-- What is a TRD Callout -->
+    <div class="callout">
+      <div class="callout-title">What is a Technical Requirements Document (TRD)?</div>
+      <div class="callout-text">
+        While the PRD defines the business vision and functional requirements, the TRD establishes <strong>HOW</strong> the system is engineered. It details the layered architecture, design principles, database normalization, API schemas, security token lifecycle, and testing standards.
+      </div>
+    </div>
+
+    <!-- Core Design Principles -->
+    <div class="section-header">
+      <h2>Architectural Principles</h2>
+      <p>5 foundational engineering decisions governing the codebase</p>
+    </div>
+
+    <div class="grid-3">
+      <div class="card">
+        <div class="card-title">1. Layered Monolith Core</div>
+        <p style="font-size:0.85rem;color:var(--text-muted);margin-top:6px">Strict Separation of Concerns: Controller → Service → Repository. Controllers never contain business logic; services never return raw database entities to controllers.</p>
+      </div>
+      <div class="card">
+        <div class="card-title">2. Isolated Storage Schemas</div>
+        <p style="font-size:0.85rem;color:var(--text-muted);margin-top:6px">Operational data (<code>public</code>) and warehouse data (<code>dw</code>) reside in separate schemas with dedicated database users adhering to least privilege.</p>
+      </div>
+      <div class="card">
+        <div class="card-title">3. Server Decides All</div>
+        <p style="font-size:0.85rem;color:var(--text-muted);margin-top:6px">Product prices, discounts, line totals, and user permissions are computed exclusively on the server. Client input totals are ignored.</p>
+      </div>
+      <div class="card">
+        <div class="card-title">4. Fail-Fast Validation</div>
+        <p style="font-size:0.85rem;color:var(--text-muted);margin-top:6px">DTOs validated immediately using Bean Validation (<code>@Valid</code>). Errors trigger a standardized JSON payload with field errors and correlation UUIDs.</p>
+      </div>
+      <div class="card">
+        <div class="card-title">5. Resilient Degradation</div>
+        <p style="font-size:0.85rem;color:var(--text-muted);margin-top:6px">If the Python analytics service is unreachable, Spring Boot returns a graceful HTTP 503 while CRUD management continues uninterrupted.</p>
+      </div>
+      <div class="card">
+        <div class="card-title">6. Zero PII in Warehouse</div>
+        <p style="font-size:0.85rem;color:var(--text-muted);margin-top:6px">The analytics warehouse intentionally holds no staff salaries, customer emails, or telephone numbers, aligning with data privacy best practices.</p>
+      </div>
+    </div>
+
+    <!-- REST API Payload Standards -->
+    <div class="section-header" style="margin-top:32px">
+      <h2>REST API Contract Standards</h2>
+      <p>Consistent request/response conventions across all 40+ endpoints</p>
+    </div>
+
+    <div class="grid-2">
+      <div>
+        <div class="code-title">URL &amp; Parameter Conventions</div>
+        <div class="code-container">
+<span class="com"># Resource Collections (Plural Nouns)</span>
+<span class="kw">GET</span>    /api/employees             <span class="com"># List with filters</span>
+<span class="kw">GET</span>    /api/employees/{id}        <span class="com"># Read by ID</span>
+<span class="kw">POST</span>   /api/employees             <span class="com"># Create resource</span>
+<span class="kw">PUT</span>    /api/employees/{id}        <span class="com"># Update resource</span>
+<span class="kw">DELETE</span> /api/employees/{id}        <span class="com"># Soft-delete</span>
+
+<span class="com"># Pagination &amp; Sorting Query Parameters</span>
+/api/employees?<span class="fn">page</span>=<span class="num">0</span>&amp;<span class="fn">size</span>=<span class="num">20</span>&amp;<span class="fn">sort</span>=lastName,asc
+
+<span class="com"># Standard Filters</span>
+/api/orders?<span class="fn">status</span>=CONFIRMED&amp;<span class="fn">region</span>=WEST
+        </div>
+      </div>
+
+      <div>
+        <div class="code-title">Standardized Error Response</div>
+        <div class="code-container">
+{
+  <span class="str">"timestamp"</span>: <span class="str">"2026-11-03T10:15:30Z"</span>,
+  <span class="str">"status"</span>: <span class="num">400</span>,
+  <span class="str">"error"</span>: <span class="str">"Bad Request"</span>,
+  <span class="str">"message"</span>: <span class="str">"Validation failed"</span>,
+  <span class="str">"path"</span>: <span class="str">"/api/employees"</span>,
+  <span class="str">"correlationId"</span>: <span class="str">"e3b0c442-98fc-..."</span>,
+  <span class="str">"fieldErrors"</span>: [
+    {
+      <span class="str">"field"</span>: <span class="str">"email"</span>,
+      <span class="str">"message"</span>: <span class="str">"must be a well-formed email address"</span>
+    }
+  ]
+}
+        </div>
+      </div>
+    </div>
+
+    <!-- Viva Key Reference: Spring Boot Annotations -->
+    <div class="section-header" style="margin-top:32px">
+      <h2>Spring Boot Annotations Reference</h2>
+      <p>Key annotations used in the implementation — essential for the project viva</p>
+    </div>
+
+    <div class="table-wrapper">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Annotation</th>
+            <th>Layer / Scope</th>
+            <th>Functional Role in CMS Project</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>@RestController</code></td>
+            <td>Controller</td>
+            <td>Marks class as an HTTP REST endpoint returning JSON-serialized response bodies.</td>
+          </tr>
+          <tr>
+            <td><code>@Service</code></td>
+            <td>Service</td>
+            <td>Declares business logic layer bean; handles transactions, price logic, and validation.</td>
+          </tr>
+          <tr>
+            <td><code>@Repository</code></td>
+            <td>Repository</td>
+            <td>Spring Data JPA interface for database queries and exception translation.</td>
+          </tr>
+          <tr>
+            <td><code>@Transactional</code></td>
+            <td>Service</td>
+            <td>Wraps database operations in an ACID transaction with automatic rollback on error.</td>
+          </tr>
+          <tr>
+            <td><code>@PreAuthorize</code></td>
+            <td>Security</td>
+            <td>Enforces role check before method execution (e.g. <code>@PreAuthorize("hasRole('ADMIN')")</code>).</td>
+          </tr>
+          <tr>
+            <td><code>@Valid</code></td>
+            <td>Controller</td>
+            <td>Triggers Jakarta Bean Validation on incoming request DTOs (e.g. <code>@NotBlank</code>, <code>@Positive</code>).</td>
+          </tr>
+          <tr>
+            <td><code>@RestControllerAdvice</code></td>
+            <td>Exception</td>
+            <td>Global exception interceptor mapping exceptions to standardized HTTP error responses.</td>
+          </tr>
+          <tr>
+            <td><code>@OneToMany / @ManyToOne</code></td>
+            <td>Entity</td>
+            <td>JPA relationship mapping (e.g. Department has many Employees; Order has many Items).</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ════════════════════ 6. DATABASE & DW ════════════════════ -->
+  <section id="tab-database" class="section">
+    <div class="hero">
+      <div class="eyebrow">Data Architecture &amp; Schemas</div>
+      <h1>Database &amp; Data Warehouse</h1>
+      <p class="hero-subtitle">
+        Relational OLTP transactional design paired with a Star-Schema OLAP warehouse hydrated via an automated 6-stage ETL pipeline.
+      </p>
+    </div>
+
+    <!-- Star Schema Diagram -->
+    <div class="diagram-container">
+      <div class="section-header" style="margin-bottom:12px">
+        <h3>Star-Schema Dimensional Model (dw Schema)</h3>
+        <p>Hover over or click any dimension to inspect its analytical attributes</p>
+      </div>
+
+      <svg id="starSvg" viewBox="0 0 700 280" style="width:100%;height:auto;display:block">
+        <g stroke="#cbd5e1" stroke-width="1.5">
+          <line x1="350" y1="140" x2="130" y2="55"/>
+          <line x1="350" y1="140" x2="570" y2="55"/>
+          <line x1="350" y1="140" x2="130" y2="225"/>
+          <line x1="350" y1="140" x2="570" y2="225"/>
+        </g>
+        <!-- Center Fact Table -->
+        <g class="st" data-t="Fact Table (fact_sales): Grain is one order item. Holds measures (quantity, revenue, cost, profit, discount) and foreign keys." transform="translate(265,105)" style="cursor:pointer">
+          <rect width="170" height="70" rx="8" fill="#f8fafc" stroke="#0f172a" stroke-width="2"/>
+          <text x="85" y="32" text-anchor="middle" font-family="'Outfit', sans-serif" font-weight="700" font-size="13" fill="#0f172a">fact_sales</text>
+          <text x="85" y="50" text-anchor="middle" font-family="'Plus Jakarta Sans', sans-serif" font-size="11" fill="#64748b">Measures &amp; Foreign Keys</text>
+        </g>
+        <!-- Dimensions -->
+        <g class="st" data-t="Dimension (dim_employee): Employee key, code, full name, department name, and job title." transform="translate(45,30)" style="cursor:pointer">
+          <rect width="170" height="50" rx="6" fill="#f8fafc" stroke="#94a3b8" stroke-width="1.5"/>
+          <text x="85" y="30" text-anchor="middle" font-family="'Outfit', sans-serif" font-weight="600" font-size="12" fill="#0f172a">dim_employee</text>
+        </g>
+        <g class="st" data-t="Dimension (dim_customer): Customer key, customer name, region (N/S/E/W/Central), source system." transform="translate(485,30)" style="cursor:pointer">
+          <rect width="170" height="50" rx="6" fill="#f8fafc" stroke="#94a3b8" stroke-width="1.5"/>
+          <text x="85" y="30" text-anchor="middle" font-family="'Outfit', sans-serif" font-weight="600" font-size="12" fill="#0f172a">dim_customer</text>
+        </g>
+        <g class="st" data-t="Dimension (dim_product): Product key, SKU, name, category, unit price, and unit cost." transform="translate(45,200)" style="cursor:pointer">
+          <rect width="170" height="50" rx="6" fill="#f8fafc" stroke="#94a3b8" stroke-width="1.5"/>
+          <text x="85" y="30" text-anchor="middle" font-family="'Outfit', sans-serif" font-weight="600" font-size="12" fill="#0f172a">dim_product</text>
+        </g>
+        <g class="st" data-t="Dimension (dim_date): Date key (YYYYMMDD), full date, month, quarter, year, is_weekend." transform="translate(485,200)" style="cursor:pointer">
+          <rect width="170" height="50" rx="6" fill="#f8fafc" stroke="#94a3b8" stroke-width="1.5"/>
+          <text x="85" y="30" text-anchor="middle" font-family="'Outfit', sans-serif" font-weight="600" font-size="12" fill="#0f172a">dim_date</text>
+        </g>
+      </svg>
+      <div id="starInfo" class="diagram-info-panel">
+        <strong>Dimensional Inspector:</strong> Hover over or click on any table above to see its role in the OLAP warehouse.
+      </div>
+    </div>
+
+    <!-- 3 DB Users with Least Privilege -->
+    <div class="section-header">
+      <h2>Database Security: Least-Privilege Users</h2>
+      <p>3 distinct PostgreSQL database roles with restricted permissions</p>
+    </div>
+
+    <div class="grid-3">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">1. cms_app</div>
+          <span class="badge badge-neutral">Spring Boot</span>
+        </div>
+        <div class="card-body">
+          <p>Has <code>SELECT, INSERT, UPDATE, DELETE</code> privileges on the operational <code>public</code> schema only. Holds zero access to the analytics <code>dw</code> schema.</p>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">2. cms_etl</div>
+          <span class="badge badge-neutral">Python ETL</span>
+        </div>
+        <div class="card-body">
+          <p>Has <code>SELECT</code> (read-only) privileges on <code>public</code> schema, and <code>INSERT, UPDATE, DELETE</code> on the <code>dw</code> schema. Cannot modify operational data.</p>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">3. cms_analytics_ro</div>
+          <span class="badge badge-neutral">Dashboards &amp; BI</span>
+        </div>
+        <div class="card-body">
+          <p>Strictly read-only <code>SELECT</code> permissions on the <code>dw</code> schema. Used by FastAPI for chart queries and external BI tools (Metabase).</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- 6-Stage ETL Pipeline -->
+    <div class="section-header" style="margin-top:32px">
+      <h2>The 6-Stage ETL Pipeline</h2>
+      <p>How data flows from 3 heterogeneous sources into clean warehouse star schema</p>
+    </div>
+
+    <div class="grid-3">
+      <div class="card">
+        <div class="card-title">1. Extract</div>
+        <p style="font-size:0.85rem;color:var(--text-muted);margin-top:6px">Reads transactional data from PostgreSQL (S1), 3-year historical sales CSV (S2), and customer review feedback CSV (S3).</p>
+      </div>
+      <div class="card">
+        <div class="card-title">2. Clean</div>
+        <p style="font-size:0.85rem;color:var(--text-muted);margin-top:6px">Drops duplicate records, validates date formats, handles nulls (median for numeric, "Unknown" for categorical), and logs rejected rows.</p>
+      </div>
+      <div class="card">
+        <div class="card-title">3. Normalize</div>
+        <p style="font-size:0.85rem;color:var(--text-muted);margin-top:6px">Standardizes region spellings (North, South, East, West, Central), lowercases text, and cleans review punctuation.</p>
+      </div>
+      <div class="card">
+        <div class="card-title">4. Transform</div>
+        <p style="font-size:0.85rem;color:var(--text-muted);margin-top:6px">Calculates measures: <code>revenue = qty × price</code>, <code>profit = revenue - cost</code>, and computes Recency-Frequency-Monetary (RFM) metrics.</p>
+      </div>
+      <div class="card">
+        <div class="card-title">5. Enrich</div>
+        <p style="font-size:0.85rem;color:var(--text-muted);margin-top:6px">Scrubs PII (removes email, phone, salaries), tags source provenance, and runs TextBlob sentiment analysis on reviews.</p>
+      </div>
+      <div class="card">
+        <div class="card-title">6. Load</div>
+        <p style="font-size:0.85rem;color:var(--text-muted);margin-top:6px">Idempotently upserts dimension records and replaces fact tables inside an atomic PostgreSQL transaction. Logs run stats.</p>
+      </div>
+    </div>
+
+    <!-- Sample SQL Queries for Viva -->
+    <div class="section-header" style="margin-top:32px">
+      <h2>Core Analytical SQL Queries</h2>
+      <p>Real SQL queries executed against the star schema for executive insights</p>
+    </div>
+
+    <div class="grid-2">
+      <div>
+        <div class="code-title">Month-over-Month Revenue Growth with LAG()</div>
+        <div class="code-container">
+<span class="kw">WITH</span> monthly <span class="kw">AS</span> (
+  <span class="kw">SELECT</span> d.year, d.month, <span class="fn">SUM</span>(f.revenue) <span class="kw">AS</span> rev
+  <span class="kw">FROM</span> dw.fact_sales f
+  <span class="kw">JOIN</span> dw.dim_date d <span class="kw">USING</span> (date_key)
+  <span class="kw">WHERE</span> f.order_status <span class="kw">IN</span> (<span class="str">'PAID'</span>, <span class="str">'DELIVERED'</span>)
+  <span class="kw">GROUP BY</span> d.year, d.month
+)
+<span class="kw">SELECT</span> year, month, rev,
+  <span class="fn">ROUND</span>(<span class="num">100.0</span> * (rev - <span class="fn">LAG</span>(rev) <span class="kw">OVER</span> (<span class="kw">ORDER BY</span> year, month))
+        / <span class="fn">NULLIF</span>(<span class="fn">LAG</span>(rev) <span class="kw">OVER</span> (<span class="kw">ORDER BY</span> year, month), <span class="num">0</span>), <span class="num">2</span>) <span class="kw">AS</span> growth_pct
+<span class="kw">FROM</span> monthly;
+        </div>
+      </div>
+
+      <div>
+        <div class="code-title">Customer RFM Matrix for K-Means Clustering</div>
+        <div class="code-container">
+<span class="kw">SELECT</span>
+  c.customer_key,
+  c.name <span class="kw">AS</span> customer_name,
+  <span class="fn">CURRENT_DATE</span> - <span class="fn">MAX</span>(d.full_date) <span class="kw">AS</span> recency_days,
+  <span class="fn">COUNT</span>(<span class="kw">DISTINCT</span> f.order_id)     <span class="kw">AS</span> frequency,
+  <span class="fn">SUM</span>(f.revenue)                  <span class="kw">AS</span> monetary_total
+<span class="kw">FROM</span> dw.fact_sales f
+<span class="kw">JOIN</span> dw.dim_customer c <span class="kw">USING</span> (customer_key)
+<span class="kw">JOIN</span> dw.dim_date d <span class="kw">USING</span> (date_key)
+<span class="kw">GROUP BY</span> c.customer_key, c.name;
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ════════════════════ 7. TESTING & QA ════════════════════ -->
+  <section id="tab-testing" class="section">
+    <div class="hero">
+      <div class="eyebrow">Quality Assurance &amp; Verification</div>
+      <h1>Testing Strategy &amp; Test Pyramid</h1>
+      <p class="hero-subtitle">
+        Multi-layered verification ensuring code correctness, role-based authorization enforcement, and data pipeline integrity.
+      </p>
+    </div>
+
+    <!-- Testing Pyramid Diagram -->
+    <div class="diagram-container">
+      <div class="section-header" style="margin-bottom:12px">
+        <h3>The 5-Tier Testing Pyramid</h3>
+        <p>Hover or click each layer to inspect test scope and execution speed</p>
+      </div>
+
+      <svg id="pyrSvg" viewBox="0 0 640 280" style="width:100%;height:auto;display:block">
+        <g class="pl" data-t="Integration Tests: Full Spring Boot application context tests against real PostgreSQL in Testcontainers." style="cursor:pointer">
+          <polygon points="320,15 380,65 260,65" fill="#f8fafc" stroke="#0f172a" stroke-width="1.5"/>
+          <text x="320" y="48" text-anchor="middle" font-family="'Outfit', sans-serif" font-weight="600" font-size="11" fill="#0f172a">Integration</text>
+        </g>
+        <g class="pl" data-t="API Tests: Postman / Newman collections executing automated end-to-end CRUD flows in CI pipeline." style="cursor:pointer">
+          <polygon points="255,70 385,70 440,120 200,120" fill="#f8fafc" stroke="#0f172a" stroke-width="1.5"/>
+          <text x="320" y="98" text-anchor="middle" font-family="'Outfit', sans-serif" font-weight="600" font-size="11" fill="#0f172a">API &amp; Postman Collection</text>
+        </g>
+        <g class="pl" data-t="Security Tests: Spring Security Test checks verifying 401 Unauthorized and 403 Forbidden for unauthorized roles." style="cursor:pointer">
+          <polygon points="195,125 445,125 500,175 140,175" fill="#f8fafc" stroke="#0f172a" stroke-width="1.5"/>
+          <text x="320" y="153" text-anchor="middle" font-family="'Outfit', sans-serif" font-weight="600" font-size="11" fill="#0f172a">Security Authorization (RBAC)</text>
+        </g>
+        <g class="pl" data-t="Controller Tests: WebMvcTest with MockMvc checking HTTP status codes, JSON response shapes, and validation." style="cursor:pointer">
+          <polygon points="135,180 505,180 560,230 80,230" fill="#f8fafc" stroke="#0f172a" stroke-width="1.5"/>
+          <text x="320" y="208" text-anchor="middle" font-family="'Outfit', sans-serif" font-weight="600" font-size="11" fill="#0f172a">Controller MockMvc Tests</text>
+        </g>
+        <g class="pl" data-t="Unit Tests: Fast, isolated JUnit 5 and Mockito tests validating price calculation, status transitions, and business rules." style="cursor:pointer">
+          <polygon points="75,235 565,235 620,280 20,280" fill="#f8fafc" stroke="#0f172a" stroke-width="1.5"/>
+          <text x="320" y="262" text-anchor="middle" font-family="'Outfit', sans-serif" font-weight="600" font-size="11" fill="#0f172a">Service Unit Tests (JUnit 5 + Mockito · 70%+ Target)</text>
+        </g>
+      </svg>
+      <div id="pyrInfo" class="diagram-info-panel">
+        <strong>Pyramid Inspector:</strong> Click any tier above to inspect its test execution role.
+      </div>
+    </div>
+
+    <!-- Coverage Status Progress -->
+    <div class="section-header">
+      <h2>Automated Test Coverage Status</h2>
+      <p>Target metrics validated via JaCoCo and pytest coverage runners</p>
+    </div>
+
+    <div class="card" style="margin-bottom:28px">
+      <div class="progress-row">
+        <div class="progress-labels">
+          <span>Service Business Logic Layer (Target: 70%)</span>
+          <span style="font-weight:600">78% Achieved</span>
+        </div>
+        <div class="progress-track"><div class="progress-fill" style="width:78%"></div></div>
+      </div>
+
+      <div class="progress-row">
+        <div class="progress-labels">
+          <span>Controller HTTP Contract Verification</span>
+          <span style="font-weight:600">68% Achieved</span>
+        </div>
+        <div class="progress-track"><div class="progress-fill" style="width:68%"></div></div>
+      </div>
+
+      <div class="progress-row">
+        <div class="progress-labels">
+          <span>Security Authorization Scenarios (401/403 Checks)</span>
+          <span style="font-weight:600">100% Covered</span>
+        </div>
+        <div class="progress-track"><div class="progress-fill" style="width:100%"></div></div>
+      </div>
+
+      <div class="progress-row" style="margin-bottom:0">
+        <div class="progress-labels">
+          <span>Python Analytics &amp; ETL Models (pytest)</span>
+          <span style="font-weight:600">65% Achieved</span>
+        </div>
+        <div class="progress-track"><div class="progress-fill" style="width:65%"></div></div>
+      </div>
+    </div>
+
+    <!-- Testing Frameworks Matrix -->
+    <div class="grid-4">
+      <div class="card">
+        <div class="card-title">JUnit 5</div>
+        <p style="font-size:0.8rem;color:var(--text-muted);margin-top:6px">Standard Java testing framework executing parameterized and lifecycle tests.</p>
+      </div>
+      <div class="card">
+        <div class="card-title">Mockito</div>
+        <p style="font-size:0.8rem;color:var(--text-muted);margin-top:6px">Mocks repository dependencies to isolate service logic without hitting the DB.</p>
+      </div>
+      <div class="card">
+        <div class="card-title">MockMvc</div>
+        <p style="font-size:0.8rem;color:var(--text-muted);margin-top:6px">Verifies HTTP status codes and JSON payloads without starting a live web server.</p>
+      </div>
+      <div class="card">
+        <div class="card-title">pytest</div>
+        <p style="font-size:0.8rem;color:var(--text-muted);margin-top:6px">Validates Python ETL transformations, K-Means clustering, and forecast outputs.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ════════════════════ 8. DEVOPS & DEPLOY ════════════════════ -->
+  <section id="tab-devops" class="section">
+    <div class="hero">
+      <div class="eyebrow">Production Infrastructure</div>
+      <h1>DevOps, Docker &amp; Deployment</h1>
+      <p class="hero-subtitle">
+        Production-ready containerization with Docker Compose, Nginx reverse proxying, Spring profiles, and GitHub Actions CI/CD automation.
+      </p>
+    </div>
+
+    <!-- Docker Compose Services Grid -->
+    <div class="section-header">
+      <h2>Container Architecture (docker-compose.yml)</h2>
+      <p>Multi-service local and production orchestration</p>
+    </div>
+
+    <div class="grid-3">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">nginx</div>
+          <span class="badge badge-neutral">Port 80/443</span>
+        </div>
+        <div class="card-body">
+          <p>Edge reverse proxy. Terminates HTTPS, applies gzip compression, and routes <code>/api/*</code> to Spring Boot while serving UI files.</p>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">backend</div>
+          <span class="badge badge-neutral">Port 8080</span>
+        </div>
+        <div class="card-body">
+          <p>Multi-stage Docker container compiling Spring Boot with JDK 21. Configured with <code>SPRING_PROFILES_ACTIVE=prod</code>.</p>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">analytics</div>
+          <span class="badge badge-neutral">Port 8000</span>
+        </div>
+        <div class="card-body">
+          <p>Python 3.11 container running FastAPI under Uvicorn workers. Communicates via internal Docker bridge network.</p>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">postgres</div>
+          <span class="badge badge-neutral">Port 5432</span>
+        </div>
+        <div class="card-body">
+          <p>Official PostgreSQL 16 image with persistent Docker volume storage and initialization scripts for schemas and roles.</p>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">metabase (Optional)</div>
+          <span class="badge badge-neutral">Port 3000</span>
+        </div>
+        <div class="card-body">
+          <p>Open-source BI tool connected read-only to <code>dw</code> schema for ad-hoc SQL reporting and benchmark comparison.</p>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">kafka (Phase 3)</div>
+          <span class="badge badge-neutral">Port 9092</span>
+        </div>
+        <div class="card-body">
+          <p>Apache Kafka KRaft mode container streaming order event messages for near real-time live sales dashboards.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Spring Profiles: Dev vs Prod -->
+    <div class="section-header" style="margin-top:32px">
+      <h2>Spring Boot Environment Profiles</h2>
+      <p>Seamless transition from lightweight local development to hardened production</p>
+    </div>
+
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">Development Profile (dev)</div>
+          <span class="badge badge-neutral">Local Rapid Dev</span>
+        </div>
+        <div class="card-body">
+          <ul class="clean-list">
+            <li><strong>Database:</strong> H2 in-memory or local PostgreSQL with automatic schema update.</li>
+            <li><strong>Swagger UI:</strong> Enabled at <code>/swagger-ui.html</code> for interactive API testing.</li>
+            <li><strong>H2 Web Console:</strong> Enabled at <code>/h2-console</code> for instant table inspection.</li>
+            <li><strong>DDL Auto:</strong> Set to <code>update</code> for rapid prototype iteration.</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">Production Profile (prod)</div>
+          <span class="badge badge-neutral">Hardened Deployment</span>
+        </div>
+        <div class="card-body">
+          <ul class="clean-list">
+            <li><strong>Database:</strong> PostgreSQL 16 with pooled connections and SSL encryption.</li>
+            <li><strong>Swagger UI:</strong> Completely disabled to prevent endpoint schema reconnaissance.</li>
+            <li><strong>H2 Console:</strong> Completely disabled; actuator endpoints restricted to <code>/health</code>.</li>
+            <li><strong>DDL Auto:</strong> Strictly set to <code>validate</code> to prevent accidental schema drops.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- Quick Run Commands -->
+    <div class="section-header" style="margin-top:32px">
+      <h2>Deployment Commands</h2>
+      <p>Terminal instructions to spin up the entire system</p>
+    </div>
+
+    <div class="code-title">Terminal Execution Commands</div>
+    <div class="code-container">
+<span class="com"># 1. Start all containers in background</span>
+docker compose up -d --build
+
+<span class="com"># 2. Verify all services are healthy</span>
+docker compose ps
+curl http://localhost/actuator/health   <span class="com"># Spring Boot Health</span>
+curl http://localhost:8000/health       <span class="com"># Analytics Health</span>
+
+<span class="com"># 3. View live application logs</span>
+docker compose logs -f backend analytics
+    </div>
+  </section>
+
+</main>
+
+<!-- Slide-Out Viva Cheat-Sheet Drawer -->
+<div id="drawerBackdrop" class="drawer-backdrop" onclick="toggleCheatSheet()"></div>
+<aside id="cheatDrawer" class="drawer">
+  <div class="drawer-header">
+    <div class="font-display" style="font-weight:700;font-size:1.05rem">Viva Defense Cheat Sheet</div>
+    <button class="btn" onclick="toggleCheatSheet()" style="padding:4px 8px">✕ Close</button>
+  </div>
+  <div class="drawer-content">
+    <p style="font-size:0.85rem;color:var(--text-muted);margin-bottom:16px">
+      Quick, high-scoring answers to the 5 most common questions asked by academic examiners:
+    </p>
+
+    <div style="margin-bottom:20px">
+      <h4 style="font-size:0.9rem;margin-bottom:4px">Q1: Why separate PostgreSQL schemas (public vs dw)?</h4>
+      <p style="font-size:0.83rem;color:var(--text-body)">
+        <strong>Answer:</strong> "Operational OLTP systems require normalized tables to ensure fast ACID transactions without update anomalies. Analytical OLAP systems require denormalized Star Schemas (facts + dimensions) to enable fast multi-table aggregations without slowing down daily CRUD operations."
+      </p>
+    </div>
+
+    <div style="margin-bottom:20px">
+      <h4 style="font-size:0.9rem;margin-bottom:4px">Q2: How does the Holt-Winters Forecast work?</h4>
+      <p style="font-size:0.83rem;color:var(--text-body)">
+        <strong>Answer:</strong> "We use statsmodels Exponential Smoothing. It models historical monthly sales trends. We validate model accuracy using MAPE (Mean Absolute Percentage Error) and generate 95% confidence intervals from residual standard deviations."
+      </p>
+    </div>
+
+    <div style="margin-bottom:20px">
+      <h4 style="font-size:0.9rem;margin-bottom:4px">Q3: Where is the JWT token stored and validated?</h4>
+      <p style="font-size:0.83rem;color:var(--text-body)">
+        <strong>Answer:</strong> "In an <code>httpOnly</code> cookie to prevent XSS attacks. Every incoming request passes through <code>JwtAuthFilter</code>, which parses the HS256 signature, extracts the user role, and sets the Spring SecurityContext."
+      </p>
+    </div>
+
+    <div style="margin-bottom:20px">
+      <h4 style="font-size:0.9rem;margin-bottom:4px">Q4: Why use a separate Python service instead of Java?</h4>
+      <p style="font-size:0.83rem;color:var(--text-body)">
+        <strong>Answer:</strong> "Python provides industry-standard data science libraries (Pandas, scikit-learn, TextBlob). Keeping it as an independent microservice ensures that intense ML computation never blocks Java transactional CRUD threads."
+      </p>
+    </div>
+
+    <div style="margin-bottom:12px">
+      <h4 style="font-size:0.9rem;margin-bottom:4px">Q5: What prevents employees from seeing other staff salaries?</h4>
+      <p style="font-size:0.83rem;color:var(--text-body)">
+        <strong>Answer:</strong> "Role-Based Access Control and DTO mapping. In <code>EmployeeService</code>, salary fields are scrubbed from response DTOs unless the caller possesses the <code>ADMIN</code> role."
+      </p>
+    </div>
+  </div>
+</aside>
+
+<script>
+// Tab Switching
+function showTab(tabName, clickedBtn) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+  
+  var targetSec = document.getElementById('tab-' + tabName);
+  if (targetSec) targetSec.classList.add('active');
+  
+  if (clickedBtn) {
+    clickedBtn.classList.add('active');
+  } else {
+    var tabs = document.querySelectorAll('.nav-tab');
+    tabs.forEach(function(t) {
+      if (t.getAttribute('onclick') && t.getAttribute('onclick').indexOf("'" + tabName + "'") !== -1) {
+        t.classList.add('active');
+      }
+    });
+  }
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// Collapsible Feature Items
+function toggleFeature(el) {
+  el.classList.toggle('open');
+}
+
+// Drawer Toggle
+function toggleCheatSheet() {
+  document.getElementById('cheatDrawer').classList.toggle('active');
+  document.getElementById('drawerBackdrop').classList.toggle('active');
+}
+
+// Category Filter for Working Features
+function filterFeatures(category, btn) {
+  if (btn) {
+    var btns = btn.parentElement.querySelectorAll('.btn');
+    btns.forEach(b => b.classList.remove('btn-primary'));
+    btn.classList.add('btn-primary');
+  }
+
+  var crudGroup = document.getElementById('feature-group-crud');
+  var anlGroup = document.getElementById('feature-group-analytics');
+  var secGroup = document.getElementById('feature-group-security');
+
+  if (category === 'all') {
+    crudGroup.style.display = 'block';
+    anlGroup.style.display = 'block';
+    secGroup.style.display = 'block';
+  } else if (category === 'crud') {
+    crudGroup.style.display = 'block';
+    anlGroup.style.display = 'none';
+    secGroup.style.display = 'none';
+  } else if (category === 'analytics') {
+    crudGroup.style.display = 'none';
+    anlGroup.style.display = 'block';
+    secGroup.style.display = 'none';
+  } else if (category === 'security') {
+    crudGroup.style.display = 'none';
+    anlGroup.style.display = 'none';
+    secGroup.style.display = 'block';
+  }
+}
+
+// Search Filter
+function searchFeatures() {
+  var term = document.getElementById('featureSearchInput').value.toLowerCase().trim();
+  var items = document.querySelectorAll('[data-search]');
+  
+  items.forEach(function(item) {
+    var searchStr = item.getAttribute('data-search').toLowerCase();
+    var textContent = item.textContent.toLowerCase();
+    if (!term || searchStr.indexOf(term) !== -1 || textContent.indexOf(term) !== -1) {
+      item.style.display = '';
+    } else {
+      item.style.display = 'none';
+    }
+  });
+}
+
+// Interactive Architecture Inspector
+var NODE_INFO = {
+  browser: "<b>Browser Client:</b> Clean HTML5 + JavaScript interface. JWT stored in httpOnly cookie; Plotly.js renders chart figure JSON.",
+  nginx: "<b>Nginx Reverse Proxy (Port 80/443):</b> Edge entry point with TLS termination. Proxies /api/* to Spring Boot, preventing direct external access to databases.",
+  spring: "<b>Spring Boot REST Backend (Port 8080):</b> System of record. Houses 8 CRUD modules, JWT auth filter, role enforcement, and analytics proxy client.",
+  db: "<b>PostgreSQL 16 (Port 5432):</b> Holds two isolated schemas: 'public' (operational transactional CRUD) and 'dw' (star-schema warehouse).",
+  fastapi: "<b>Python FastAPI (Port 8000):</b> Analytics microservice. Executes ETL pipeline, Holt-Winters forecasting, K-Means clustering, and NLP sentiment.",
+  csv: "<b>External CSV Sources:</b> historical_sales.csv (3-year trends) and reviews.csv (customer feedback corpus) extracted during ETL.",
+  kafka: "<b>Apache Kafka (Port 9092):</b> Phase 3 event streaming broker distributing real-time order notifications after commit."
+};
+
+var FLOW_STEPS = {
+  login: ["User submits credentials to Nginx", "Nginx forwards to Spring Boot /api/auth/login", "Spring validates BCrypt hash and issues JWT httpOnly cookie", "User account record retrieved from PostgreSQL public schema"],
+  crud: ["Client submits CRUD form", "Spring Boot authenticates JWT and verifies role authorization", "Service layer enforces business rules and computes pricing", "Transaction committed to PostgreSQL public schema"],
+  analytics: ["User selects dashboard filters", "Spring Boot validates token and forwards via internal HTTP key", "FastAPI queries star-schema dw tables", "Pandas & ML models compute figure JSON and return to browser"],
+  etl: ["Admin triggers ETL run", "FastAPI extracts from PostgreSQL and external CSVs", "Data cleaned, normalized, and scrubbed of PII", "Star-schema fact and dimension tables idempotently updated"]
+};
+
+document.querySelectorAll('.an').forEach(function(node) {
+  node.addEventListener('click', function() {
+    var id = node.getAttribute('data-id');
+    if (NODE_INFO[id]) {
+      document.getElementById('archInfo').innerHTML = NODE_INFO[id];
+    }
+  });
+});
+
+var flowTimer = null;
+function traceFlow(flowName) {
+  clearTimeout(flowTimer);
+  var steps = FLOW_STEPS[flowName];
+  if (!steps) return;
+  var idx = 0;
+  function nextStep() {
+    if (idx >= steps.length) {
+      document.getElementById('archInfo').innerHTML = "<b>Flow Complete:</b> " + steps[steps.length - 1];
+      return;
+    }
+    document.getElementById('archInfo').innerHTML = "<b>Step " + (idx + 1) + " of " + steps.length + ":</b> " + steps[idx];
+    idx++;
+    flowTimer = setTimeout(nextStep, 1500);
+  }
+  nextStep();
+}
+
+// Dimensional & Pyramid Hover Handlers
+document.querySelectorAll('.st').forEach(function(el) {
+  var handler = function() {
+    document.getElementById('starInfo').innerHTML = "<b>Selected Table:</b> " + el.getAttribute('data-t');
+  };
+  el.addEventListener('mouseenter', handler);
+  el.addEventListener('click', handler);
+});
+
+document.querySelectorAll('.pl').forEach(function(el) {
+  var handler = function() {
+    document.getElementById('pyrInfo').innerHTML = "<b>Testing Tier:</b> " + el.getAttribute('data-t');
+  };
+  el.addEventListener('mouseenter', handler);
+  el.addEventListener('click', handler);
+});
+</script>
+</body>
+</html>

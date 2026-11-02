@@ -1,5 +1,7 @@
 :root {
-  --font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-display: 'Outfit', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
   --bg-primary: #f8fafc;
   --bg-surface: #ffffff;
   --bg-sidebar: #0f172a;
@@ -10,10 +12,10 @@
   --text-inverse: #f8fafc;
   --border-color: #e2e8f0;
   
-  --primary: #4f46e5;
-  --primary-hover: #4338ca;
-  --primary-light: #eef2ff;
-  --secondary: #06b6d4;
+  --primary: #0f172a;
+  --primary-hover: #1e293b;
+  --primary-light: #f1f5f9;
+  --secondary: #334155;
   --success: #10b981;
   --success-light: #ecfdf5;
   --warning: #f59e0b;
@@ -74,7 +76,7 @@ body {
 .sidebar-logo-icon {
   width: 40px;
   height: 40px;
-  background: linear-gradient(135deg, var(--primary), var(--secondary));
+  background: #0f172a; border: 1px solid #334155;
   border-radius: var(--radius-md);
   display: flex;
   align-items: center;
@@ -82,7 +84,7 @@ body {
   font-weight: 800;
   font-size: 20px;
   color: white;
-  box-shadow: 0 4px 12px rgba(79, 70, 229, 0.35);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.15);
 }
 
 .sidebar-brand-name {
@@ -137,10 +139,10 @@ body {
 }
 
 .nav-link.active {
-  background: linear-gradient(90deg, var(--primary), #6366f1);
+  background: #1e293b; border-left: 3px solid #38bdf8;
   color: white;
   font-weight: 600;
-  box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
+  box-shadow: none;
 }
 
 .nav-link i {
@@ -168,7 +170,7 @@ body {
   width: 36px;
   height: 36px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+  background: #1e293b; border: 1px solid #334155;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -828,3 +830,9 @@ body {
   }
 }
 
+
+
+h1, h2, h3, h4, h5, .sidebar-brand-name, .page-title-area h1, .stat-value, .card-box-title, .exec-kpi-value {
+  font-family: var(--font-display);
+  letter-spacing: -0.02em;
+}
